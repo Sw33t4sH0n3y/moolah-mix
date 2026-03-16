@@ -1,0 +1,142 @@
+<%- include('../../partials/header') %>
+
+<main class="page-container">
+    <a href="/tracks/<%= track._id %>" class="back-link">← Back to <%= track.title %></a>
+
+    <div class="card collaborator-card">
+        <h1>Add Collabs</h1>
+        <p class="section-description">Add Collaborators <%= track.title %></p>
+
+        <form action="/tracks/<%= track._id %>/collaborators" method="POST">
+
+            <section class="form-section">
+                <h2 class="section-heading">Core Deets</h2>
+
+                <div class="form-group">
+                    <label for="name">Name ★</label>
+                    <input type="text" id="name" name="name" required placeholder="Collaborator's name">
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" placeholder="their@email.com">
+                </div>
+            </section>
+
+       <section class="form-section">
+        <h2 class="section-heading">Roles ★</h2>
+        <p class="section-description">What was their contribution?</p>
+
+        <div class="role-buttons">
+            <% Object.entries(ROLES).forEach(([key,role]) => { %>
+                <label class="role-checkbox">
+                    <input type="checkbox" name="roles" value="<%= key %>">
+                    <span class="role-btn">
+                        <%= role.icon %> <%= role.label %>
+                    </span>
+                </label>
+                <% }) %>
+        </div>
+       </section>
+       
+       <div class="role-fields role-fields-artist hidden" id="artist-fields">
+        <h3>🎤 Artist Deets</h3>
+                <div class="form-group">
+                    <label for="stageName">Stage Name</label>
+                    <input type="text" id="stageName" name="stageName">
+                </div>
+
+                <div class="form-group">
+                    <label for="genre">Genre</label>
+                    <input type="text" id="genre" name="genre">
+                </div>       
+       </div>
+
+            <div class="role-fields role-fields-producer hidden" id="producer-fields">
+                <h3>🎛️ Producer Deets</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                <label for="producerTag">Producer Tag</label>
+                    <input type="text" id="producerTag" name="producerTag">
+                </div>
+                <div class="form-group">
+                    <label for="daw">DAW</label>
+                    <select id="daw" name="daw">
+                        <option value="">Select DAW</option>
+                        <% DAW_OPTIONS.forEach(d => { %>
+                            <option value="<%= d %>"><%= d %></option>
+                      <% }) %>
+                    </select>
+            </div>
+        </div>    
+    </div>
+
+                <div class="role-fields role-fields-writer hidden" id="writer-fields">
+                <h3>✍️ Writer Deets</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                <label for="writerPro">PRO</label>
+                <select id="writerPro" name="writerPro">
+                   <option value="">Select PRO</option>
+                        <% PRO_OPTIONS.forEach(d => { %>
+                            <option value="<%= d %>"><%= d %></option>
+                      <% }) %>
+                </select>
+                </div>
+                <div class="form-group">
+                    <label for="writerIpi">IPI Number</label>
+                    <input type="text" id="writerIpi" name="writerIpi">
+                </div>
+            </div>
+        </div>
+
+        <div class="role-fields role-fields-publisher hidden" id="publisher-fields">
+                <h3>📄 Publisher Deets</h3>
+                <div class="form-group">
+                <label for="publishingCompany">Publishing Company</label>
+                    <input type="text" id="publishingCompany" name="publishingCompany">
+                </div>
+                <div class="form-row">
+                <div class="form-group">
+                    <label for="publisherPro">Publisher PRO</label>
+                    <select id="publisherPro" name="publisherPro">
+                        <option value="">Select PRO</option>
+                        <% PRO_OPTIONS.forEach(p => { %>
+                            <option value="<%= p %>"><%= p %></option>
+                      <% }) %>
+                    </select>
+            </div>
+            <div class="form-group">
+                <label for="publisherIpi">Publisher IPI</label>
+                <input type="text" id="publisherIpi" name="publisherIpi">
+            </div>
+        </div>
+    </div>
+    
+    <div class="form-actions">
+        <a href="/tracks/<%= track._id %>" class="btn btn-secondary">Cancel</a>
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+    </div>
+        </form>
+    </div>
+</main>
+
+<script>
+    document.querySelectorAll('.role-checkbox input').forEach(checkbox => {
+        checkbox.addEventListener('change',function() {
+            const role = this.value;
+            const fields = document.querySelector('.role-fields-' + role);
+            const btn = this.nextElementSibling;
+
+            if (this.checked) {
+                fields.classList.remove('hidden');
+                btn.classList.add('selected');
+            } else {
+                fields.classList.add('hidden');
+                btn.classList.remove('selected');
+            }
+        });
+    });
+</script>
+
+<%- include('../../partials/footer') %>

@@ -1,0 +1,42 @@
+<%- include('../partials/header') %>
+
+<main class="page-container">
+    <div class="page-header">
+        <h1>My Songs</h1>
+        <a href="/tracks/new" class="btn btn-primary">+ New Song</a>
+    </div>
+
+    <% if (tracks.length === 0) { %>
+    
+        <div class="empty-state">
+            <div class="empty-state">🎵</div>
+            <h2>Songs Empty</h2>
+            <p>Begin catalog management by documenting ownership rights.</p>
+            <a href="/tracks/new" class="btn btn-primary">Compose First Song</a>
+        </div>
+        <% } else { %>
+            <div class="tracks-grid">
+                <% tracks.forEach(track => { %>
+                    <a href="/tracks/<%= track._id %>" class="track-card">
+                        <div class="track-vinyl">
+                            <div class="track-vinyl-label"></div>
+                        </div>
+
+                        <div class="track-info">
+                            <h3 class="track-title"><%= track.title %></h3>
+                            <div class="track-meta">
+                                <span class="status-badge status-<%= track.status %>">
+                                    <%= track.status %>
+                                </span>
+                                <span>👥 <%= track.collaborators ? track.collaborators.length : 0 %> collaborators</span>
+                            </div>
+                        </div>
+                        
+                        <div class="track-arrow">→</div>
+                    </a> 
+            <% }) %>
+            </div>
+   <% } %>
+</main>
+
+<%- include('../partials/footer') %>

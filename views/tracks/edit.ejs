@@ -1,0 +1,45 @@
+<%- include('../partials/header') %>
+
+<main class="page-container">
+    <a href="/tracks" class="back-link">← Back to Songs</a>
+
+    <div class="card track-form-card">
+        <h1>Cue the new Track</h1>
+
+        <form action="/tracks/<%= track._id %>?_method=PUT" method="POST">
+
+            <div class="form-group">
+                <label for="title">Official Song Title</label>
+                <input type="text" id="title" name="title" required value="<%= track.title %>">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="releaseDate">Drop Date</label>
+                    <input type="date" id="releaseDate" name="releaseDate" value="<%= track.releaseDate ? new Date(track.releaseDate).toISOString().split('T')[0] : '' %>">
+                </div>
+
+                <div class="form-group">
+                    <label for="status">Drop Status</label>
+                    <select id="status" name="status">
+                        <option value="draft" <%= track.status === 'draft' ? 'selected' : '' %>>Draft</option>
+                        <option value="unreleased" <%= track.status === 'unreleased' ? 'selected' : '' %>>Unreleased</option>
+                        <option value="released" <%= track.status === 'released' ? 'selected' : '' %>>Released</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="isrc">ISRC Code</label>
+                <input type="text" id="isrc" name="isrc" value="<%= track.isrc || '' %>" placeholder="">
+                <span class="form-hint">ISRC</span>
+            </div>
+            <div class="form-actions">
+                <a href="/tracks/<%= track._id %>" class="btn btn-secondary">Abort</a>
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</main>
+
+<%- include('../partials/footer') %>
