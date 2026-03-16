@@ -37,6 +37,21 @@ router.post('/', async (req, res) => {
     }
 });
 
+// GET /tracks/:id/share - Public view (no Login required)
+router.get ('/:id/share', async (req, res) => {
+    try {
+        const track = await Track.findById(req.params.id);
+        if (!track) {
+            return res.status(404).render('error.ejs', { message: 'Track not found' });
+        }
+        const owner = await User.findById(track.owner);
+        res.render('tracks/share.ejs', { track, owner, ROLES });
+    } catch (error) {
+        console.log(error);
+        res.redirect('/');
+    }
+});
+
 //GET /tracks/:id/collaborators -View all
 router.get('/:id/collaborators', async (req, res) => {
  try {

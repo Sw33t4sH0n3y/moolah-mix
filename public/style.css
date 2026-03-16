@@ -1500,3 +1500,113 @@ body.light-mode .search-result-item:hover {
     margin-left: auto;
     margin-right: auto;
 }
+/* ==========================================
+   SHARE PAGE
+   ========================================== */
+.share-card {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.share-header {
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.share-header h1 {
+    margin-bottom: 8px;
+}
+
+.share-meta {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    color: var(--color-text-muted);
+    margin-bottom: 24px;
+}
+
+.share-section {
+    margin-bottom: 24px;
+}
+
+.share-section h2 {
+    font-size: 1.25rem;
+    margin-bottom: 16px;
+    color: var(--color-amber);
+}
+
+.share-person {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-md);
+    margin-bottom: 12px;
+}
+
+.share-avatar {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, var(--color-orange), var(--color-red));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.25rem;
+}
+
+.share-info {
+    flex: 1;
+}
+
+.share-name {
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.share-roles {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+}
+
+.share-splits {
+    display: flex;
+    gap: 16px;
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+}
+
+.share-totals {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.share-total-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-md);
+}
+
+.share-total-item .valid {
+    color: var(--color-success);
+    font-weight: bold;
+}
+
+.share-total-item .invalid {
+    color: var(--color-error);
+    font-weight: bold;
+}
+
+.share-footer {
+    text-align: center;
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
