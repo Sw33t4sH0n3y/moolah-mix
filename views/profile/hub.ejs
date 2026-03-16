@@ -123,17 +123,28 @@
     document.querySelectorAll('.role-checkbox input').forEach(checkbox => {
         checkbox.addEventListener('change', function() {
             const role = this.value;
-            const fields = document.querySelector(role + '-fields');
+            const fields = document.querySelector('#' + role + '-fields');
             const btn = this.nextElementSibling;
 
+            if (fields) {
             if (this.checked) {
                 fields.classList.remove('hidden');
                 btn.classList.add('selected');
             } else {
                 fields.classList.add('hidden');
                 btn.classList.remove('selected');
+              }
             }    
         });
+    });
+
+     // Also show fields on page load if already checked
+    document.querySelectorAll('.role-checkbox input:checked').forEach(checkbox => {
+        const role = checkbox.value;
+        const fields = document.querySelector('#' + role + '-fields');
+        if (fields) {
+            fields.classList.remove('hidden');
+        }
     });
 </script>
 <%- include('../partials/footer') %>

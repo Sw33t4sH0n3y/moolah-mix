@@ -1610,3 +1610,20 @@ body.light-mode .search-result-item:hover {
     padding-top: 24px;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
+
+@media (max-width: 768px) {
+    .share-meta {
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .share-totals {
+        grid-template-columns: 1fr;
+    }
+    
+    .share-splits {
+        flex-direction: column;
+        gap: 4px;
+    }
+}

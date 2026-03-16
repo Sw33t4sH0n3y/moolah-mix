@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const crypto = require('crypto')
 
 const trackSchema = new mongoose.Schema({
     title: {
@@ -34,11 +35,26 @@ const trackSchema = new mongoose.Schema({
         writerIpi: String,
         publishingCompany: String,
         publisherPro: String,
-        publisherIpi: String
+        publisherIpi: String,
+
+        status: {
+            type: String,
+            enum: ['pending', 'viewed', 'agreed', 'disputed'],
+            default: 'pending'
+        },
+        inviteToken: {
+            type: String,
+            default: function() {
+                return crypto.randomBytes(16).toString('hex');
+            }
+        },
+        viewedAt: Date,
+        agreedAt: Date,
+        agreedFromIP: String    
     }],
     splits: {
         master: {
-            user: {
+            owner: {
                 type: Number,
                 default: 100
             },
@@ -49,7 +65,7 @@ const trackSchema = new mongoose.Schema({
             }    
     },
     publishing: {
-        user: {
+        owner: {
             type: Number,
             default: 100
     },       
@@ -59,7 +75,12 @@ const trackSchema = new mongoose.Schema({
             default: {}
            }
         }
-    }
+    },
+    isLockedAt: Date,
+    allAgreed: {
+        type: Boolean,
+        default: false
+     }
  }, { 
     timestamps: true
 });
