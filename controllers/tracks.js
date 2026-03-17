@@ -4,37 +4,7 @@ const Track = require('../models/track');
 const User = require('../models/user');
 const { ROLES, PRO_OPTIONS, DAW_OPTIONS} = require('../config/constants');
 const PDFDocument = require('pdfkit');
-
-// // TEMPORARY: Clean up corrupted collaborators
-// router.get('/cleanup/:id', async (req, res) => {
-//     try {
-//         // Use native MongoDB to bypass Mongoose validation
-//         const mongoose = require('mongoose');
-//         const result = await mongoose.connection.db.collection('tracks').updateOne(
-//             { _id: new mongoose.Types.ObjectId(req.params.id) },
-//             { $set: { collaborators: [] } }
-//         );
-//         console.log('Cleanup result:', result);
-//         res.send('Collaborators cleared! <a href="/tracks/' + req.params.id + '">Go back</a>');
-//     } catch (error) {
-//         console.log(error);
-//         res.send('Error: ' + error.message);
-//     }
-// });
-
-// // TEMPORARY: Show collaborator tokens
-// router.get('/tokens/:id', async (req, res) => {
-//     try {
-//         const track = await Track.findById(req.params.id);
-//         let html = '<h1>Collaborator Tokens</h1>';
-//         track.collaborators.forEach(c => {
-//             html += `<p><strong>${c.name}</strong>: <a href="/tracks/agree/${c.inviteToken}">${c.inviteToken}</a></p>`;
-//         });
-//         res.send(html);
-//     } catch (error) {
-//         res.send('Error: ' + error.message);
-//     }
-// });
+const { sendInviteEmail, sendAgreementConfirmation } = require('../services/email');
 
 // GET /tracks
 router.get('/', async (req, res) => {
@@ -149,6 +119,11 @@ router.post('/agree/:token', async (req, res) => {
         
         await track.save();
         
+        // Send confirmation email
+        if (collaborator.email) {
+            await sendAgreementConfirmation(collaborator, track);
+        }
+        
         res.render('tracks/agreed.ejs', { 
             track, 
             collaborator 
@@ -204,6 +179,7 @@ router.get('/:id/collaborators/new', async (req, res) => {
 router.post('/:id/collaborators', async (req, res) => {
     try {
         const track = await Track.findById(req.params.id);
+        const user = await User.findById(req.session.user._id);
         
         // Extract roles properly
         let roles = [];
@@ -232,6 +208,13 @@ router.post('/:id/collaborators', async (req, res) => {
         
         track.collaborators.push(collaboratorData);
         await track.save();
+        
+        // Send invite email if collaborator has email
+        const newCollab = track.collaborators[track.collaborators.length - 1];
+        if (newCollab.email) {
+            const ownerName = user.displayName || user.username;
+            await sendInviteEmail(newCollab, track, ownerName, newCollab.inviteToken);
+        }
         
         res.redirect('/tracks/' + req.params.id);
     } catch (error) {
