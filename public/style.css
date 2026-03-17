@@ -866,10 +866,11 @@ a {
         0 0 80px rgba(201, 162, 39, 0.3),
         0 0 120px rgba(45, 138, 78, 0.2),
         inset 0 0 100px rgba(0, 0, 0, 0.9);
-    -webkit-animation: mega-spin 30s linear infinite;
-    animation: mega-spin 30s linear infinite;
+    -webkit-animation: mega-spin 8s linear infinite;
+    animation: mega-spin 8s linear infinite;
 }
 
+/* More visible grooves */
 .mega-grooves {
     position: absolute;
     top: 5%;
@@ -877,13 +878,50 @@ a {
     width: 90%;
     height: 90%;
     border-radius: 50%;
-    background: repeating-radial-gradient(
-        circle at center,
-        transparent 0px,
-        transparent 3px,
-        rgba(255, 255, 255, 0.02) 4px,
-        transparent 5px,
-        transparent 8px
+    background: 
+        repeating-radial-gradient(
+            circle at center,
+            transparent 0px,
+            transparent 4px,
+            rgba(255, 255, 255, 0.06) 5px,
+            transparent 6px,
+            transparent 10px
+        );
+    pointer-events: none;
+}
+
+/* Add a shine/reflection that makes spin visible */
+.mega-vinyl-record::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.15) 0%,
+        transparent 30%,
+        transparent 70%,
+        rgba(255, 255, 255, 0.05) 100%
+    );
+    pointer-events: none;
+}
+
+/* Add a moving highlight */
+.mega-vinyl-record::after {
+    content: '';
+    position: absolute;
+    top: 10%;
+    left: 10%;
+    width: 25%;
+    height: 25%;
+    border-radius: 50%;
+    background: radial-gradient(
+        circle,
+        rgba(255, 255, 255, 0.1) 0%,
+        transparent 70%
     );
     pointer-events: none;
 }
@@ -1956,7 +1994,9 @@ a {
     height: 150px;
     cursor: crosshair;
     touch-action: none;
-    background: rgba(0, 0, 0, 0.3);
+    background-color: rgba(255, 255, 255, 0.95);
+    border: 2px dashed var(--color-gold);
+    border-radius: 8px;
 }
 
 .signature-input {

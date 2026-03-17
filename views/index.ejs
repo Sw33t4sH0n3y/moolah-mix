@@ -70,26 +70,31 @@
 
 <!-- Vinyl scratch sound -->
 <audio id="vinylScratch" preload="auto">
-<source src="/sounds/Vinyl_Dead_Wax.wav" type="audio/wav"></audio>
+    <source src="/sounds/vinyl-scratch.wav" type="audio/wav">
+</audio>
 
 <script>
     const vinyl = document.getElementById('vinylRecord');
     const scratchSound = document.getElementById('vinylScratch');
-    let audioEnabled = false;
     
-    // Enable audio after first click anywhere on page
-    document.addEventListener('click', function() {
-        audioEnabled = true;
-    }, { once: true });
+    // Preload the sound
+    scratchSound.load();
     
     vinyl.addEventListener('mouseenter', function() {
-        if (audioEnabled) {
+        scratchSound.currentTime = 0;
+        scratchSound.volume = 0.4;
+        scratchSound.play().catch(function() {
+            // Sound blocked until user interaction
+        });
+    });
+    
+    // Enable audio on first click anywhere
+    document.addEventListener('click', function enableAudio() {
+        scratchSound.play().then(function() {
+            scratchSound.pause();
             scratchSound.currentTime = 0;
-            scratchSound.volume = 0.3;
-            scratchSound.play().catch(function(e) {
-                // Ignore if still blocked
-            });
-        }
+        }).catch(function() {});
+        document.removeEventListener('click', enableAudio);
     });
 </script>
 
