@@ -1,74 +1,96 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="/style.css" />
-    <link rel="icon" href="/images/Moolah_Mix_Logo.jpg" type="image/jpeg">
-    <title>Moolah M$x | Stack Your Splits, Secure Your Bag</title>
-  </head>
-  <body>
-    <%- include ('partials/header') %>
+<%- include('partials/header') %>
 
-    <main class="landing-page">
-        <section class="hero">
+<main class="landing-page">
+    <section class="hero-vinyl">
+        
+        <!-- Top: Tag and Title -->
+        <div class="hero-top-text">
             <p class="hero-tag">Split sheets made simple</p>
-            
             <h1 class="hero-title">
-                Stack Your <span class="text-gold">Splits</span>,<br>
-                Secure Your <span class="text-green">Bag</span>
+                <span class="curve-top">Stack Your <span class="text-gold">Splits</span>,</span>
+                <span class="curve-bottom">Secure Your <span class="text-green">Bag</span></span>
             </h1>
+        </div>
 
-            <!-- Vinyl Dial -->
-            <div class="vinyl-dial">
-                <div class="vinyl-dial-record">
-                    <div class="vinyl-grooves"></div>
-                    <div class="vinyl-label">
-                        <img src="/images/Moolah_Mix_Logo.jpg" alt="Moolah M$X" class="vinyl-logo">
-                    </div>
+        <!-- Large Vinyl Record -->
+        <div class="mega-vinyl" id="vinylRecord">
+            <div class="mega-vinyl-record">
+                <div class="mega-grooves"></div>
+                <div class="mega-label">
+                    <img src="/images/Moolah_Mix_Logo.png" alt="Moolah M$X" class="mega-logo">
                 </div>
+            </div>
+            
+            <!-- Static content inside record (counter-spins to stay still) -->
+            <div class="vinyl-static-content">
+                <p class="hero-subtitle">
+                    Professional split sheets for independent artists.<br>
+                    Document ownership, manage collaborators, protect your royalties.
+                </p>
                 
-                <!-- Orbiting Buttons -->
-                <div class="orbit-ring">
-                    <a href="/auth/sign-up" class="orbit-btn orbit-btn-primary">Start Free</a>
-                    <a href="/auth/sign-in" class="orbit-btn orbit-btn-secondary">Sign In</a>
-                    <a href="#features" class="orbit-btn orbit-btn-tertiary">Learn More</a>
+                <div class="vinyl-buttons">
+                    <a href="/auth/sign-up" class="vinyl-btn vinyl-btn-primary">
+                        <span class="btn-icon">🚀</span>
+                        <span class="btn-text">Start Free</span>
+                    </a>
+                    <a href="/auth/sign-in" class="vinyl-btn vinyl-btn-secondary">
+                        <span class="btn-icon">🔑</span>
+                        <span class="btn-text">Sign In</span>
+                    </a>
                 </div>
             </div>
+        </div>
 
-            <p class="hero-subtitle">
-                Professional split sheets for independent artists.<br>
-                Document ownership, manage collaborators, protect your royalties.
-            </p>
-        </section>
-      
-        <section class="features" id="features">
-            <h2 class="section-title">One Stop. Zero Compromises</h2>
+    </section>
+  
+    <section class="features" id="features">
+        <h2 class="section-title">One Stop. Zero Compromises</h2>
 
-            <div class="feature-grid">
-                <div class="feature-card">
-                    <div class="feature-icon">📝</div>
-                    <h3>Protect the Percentages</h3>
-                    <p>No blurred lines: Industry-standard ownership tracking. Masters and publishing split clearly.</p>
-                </div>
-
-                <div class="feature-card">
-                    <div class="feature-icon">📊</div>
-                    <h3>Track Percentages</h3>
-                    <p>Zero Guesswork. Splits locked at 100%</p>
-                </div>
-
-                <div class="feature-card">
-                    <div class="feature-icon">📤</div>
-                    <h3>Export & Share</h3>
-                    <p>Download it. Share industry standard splitsheets for labels, distributors, and PROs.</p>
-                </div>
+        <div class="feature-grid">
+            <div class="feature-card">
+                <div class="feature-icon">📝</div>
+                <h3>Protect the Percentages</h3>
+                <p>No blurred lines: Industry-standard ownership tracking. Masters and publishing split clearly.</p>
             </div>
-        </section>
-    </main>
-       
-    <footer class="main-footer">
-        <p>💰 Moolah M$x &copy; <%= new Date().getFullYear() %> Stack Your Splits, Secure Your Bag</p>
-    </footer>
-  </body>
-</html>
+
+            <div class="feature-card">
+                <div class="feature-icon">📊</div>
+                <h3>Track Percentages</h3>
+                <p>Zero Guesswork. Splits locked at 100%</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">📤</div>
+                <h3>Export & Share</h3>
+                <p>Download it. Share industry standard splitsheets for labels, distributors, and PROs.</p>
+            </div>
+        </div>
+    </section>
+</main>
+
+<!-- Vinyl scratch sound -->
+<audio id="vinylScratch" preload="auto">
+<source src="/sounds/Vinyl_Dead_Wax.wav" type="audio/wav"></audio>
+
+<script>
+    const vinyl = document.getElementById('vinylRecord');
+    const scratchSound = document.getElementById('vinylScratch');
+    let audioEnabled = false;
+    
+    // Enable audio after first click anywhere on page
+    document.addEventListener('click', function() {
+        audioEnabled = true;
+    }, { once: true });
+    
+    vinyl.addEventListener('mouseenter', function() {
+        if (audioEnabled) {
+            scratchSound.currentTime = 0;
+            scratchSound.volume = 0.3;
+            scratchSound.play().catch(function(e) {
+                // Ignore if still blocked
+            });
+        }
+    });
+</script>
+
+<%- include('partials/footer') %>
