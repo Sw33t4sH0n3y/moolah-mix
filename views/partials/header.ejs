@@ -4,79 +4,42 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="/style.css" />
-    <title>Payout Pitch | No Shady Splits, Just Solid Ownership</title>
+    <link rel="icon" href="/images/Moolah_Mix_Logo.png" type="image/jpeg">
+    <title>Moolah M$X | Stack Your Splits, Secure Your Bag</title>
   </head>
   <body>
-    <div class="vinyl-record vinyl-1">
-        <div class="vinyl-label">
-            <div class="vinyl-center"></div>
-        </div>
-    </div>
-    <div class="vinyl-record vinyl-2">
-        <div class="vinyl-label">
-            <div class="vinyl-center"></div>
-        </div>
-    </div>
-    <div class="glow-orb orb1"></div>
-    <div class="glow-orb orb2"></div>
-    <div class="audio-waves"></div>
-
-    <div class="speaker speaker1">
-      <div class="speaker-grill">
-          <div class="speaker-cone"></div>
-          <div class="speaker-dome"></div>
-      </div>
-          <div class="speaker-woofer">
-              <div class="woofer-cone"></div>
-              <div class="woofer-dome"></div>
-              </div>
-            </div>
-
-    <div class="speaker speaker2">
-      <div class="speaker-grill">
-          <div class="speaker-cone"></div>
-          <div class="speaker-dome"></div>
-      </div>
-          <div class="speaker-woofer">
-            <div class="woofer-cone"></div>
-              <div class="woofer-dome"></div>
-      </div>
-    </div>
 
     <header class="main-header">
       <div class="header-content">
         <a href="/" class="logo">
-
-          <span class="logo-icon">📀</span>
-          <span class="logo-text">Payout Pitch</span>
+          <img src="/images/Moolah_Mix_Logo.png" alt="Moolah M$X" class="logo-image">
         </a>
 
-<nav class="main-nav">
-    <button class="theme-toggle" onclick="toggleTheme()" title="Toggle dark/Light mode">🌙</button>
-    <% if (typeof user !== 'undefined' && user) { %>
-
-        <a href="/tracks" class="nav-link">My Songs</a>
-        <a href="/hub" class="nav-link">Hub</a>
-        
-        <span class="user-avatar"><%= user.displayName ? user.displayName.charAt(0).toUpperCase():'' %></span>
-        <a href="/auth/sign-out" class="btn btn-secondary btn small">Sign-Out</a>
-    <% } else { %>
-          <a href="/auth/sign-in" class="nav-link">Sign-in</a>
-          <a href="/auth/sign-up" class="btn btn-primary">Sign-Up</a>
+        <nav class="main-nav">
+          <button class="theme-toggle" onclick="toggleTheme()" title="Toggle dark/light mode">🌙</button>
+          <% if (typeof user !== 'undefined' && user) { %>
+            <a href="/tracks" class="nav-link">My Songs</a>
+            <a href="/hub" class="nav-link">Hub</a>
+            <span class="user-avatar"><%= user.displayName ? user.displayName.charAt(0).toUpperCase() : 'U' %></span>
+            <a href="/auth/sign-out" class="btn btn-secondary btn-small">Sign Out</a>
+          <% } else { %>
+            <a href="/auth/sign-in" class="nav-link">Sign In</a>
+            <a href="/auth/sign-up" class="btn btn-primary">Sign Up</a>
           <% } %>
-          </nav>
-        </div>
+        </nav>
+      </div>
     </header>
-   <script>
-    function toggleTheme() {
-      document.body.classList.toggle('light-mode');
-      const isLight = document.body.classList.contains('light-mode');
-      localStorage.setItem('theme', isLight ? 'light' : 'dark');
-      document.querySelector('.theme-toggle').textContent = isLight ? '☀️' : '🌙';
-    }
 
-    if (localStorage.getItem('theme') === 'light') {
-      document.body.classList.add('light-mode');
-      document.querySelector('.theme-toggle').textContent = '☀️'
-    }
-   </script>
+    <script>
+      function toggleTheme() {
+        document.body.classList.toggle('light-mode');
+        var isLight = document.body.classList.contains('light-mode');
+        localStorage.setItem('theme', isLight ? 'light' : 'dark');
+        document.querySelector('.theme-toggle').textContent = isLight ? '☀️' : '🌙';
+      }
+
+      if (localStorage.getItem('theme') === 'light') {
+        document.body.classList.add('light-mode');
+        document.querySelector('.theme-toggle').textContent = '☀️';
+      }
+    </script>
