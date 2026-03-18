@@ -158,6 +158,12 @@ a {
     background-clip: text;
 }
 
+.landing-page .hero-title .text-green {
+    background: linear-gradient(90deg, #a7f3d0, #6ee7b7);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
 
 /* ==========================================
    HEADER & NAV
@@ -807,6 +813,7 @@ a {
     align-items: center;
     padding: 24px;
     overflow: hidden;
+    background: linear-gradient(180deg, #0d1f12 0%, #1a4d2e 50%, #0d1f12 100%);
 }
 
 /* Top text - tag and title */
