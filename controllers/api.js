@@ -1,48 +1,43 @@
 const express = require('express');
 const router = express.Router();
+const soundcloud = require('../services/soundcloud');
 
-router.get('/deezer/search', async (req, res) => {
-    const query = req.query.q || '';
-
-    try {
-        if (!query) {
-            return res.render('tracks/new.ejs', {query: '', data: [] });
-        }
-        const response = await fetch('https://api.deezer.com/search?q=' + encodeURIComponent(query));
-        const data = await response.json();
-        
-        console.log(data);
-        res.render('tracks/new.ejs', { query, data: data.data });
-    } catch (error) {
-        console.log (error);
-        res.render('tracks/new.ejs', { query, data: [], error: 'Search failed' });
+// Search SoundCloud tracks
+router.get('/soundcloud/search', async (req, res) => {
+    const query = req.query.q;
+    if (!query) {
+        return res.json({ success: false, error: 'No search query provided', tracks: [] });
     }
+    
+    const results = await soundcloud.searchTracks(query, 5);
+    res.json(results);
 });
 
-//GET api/deezer/track/:id
-router.get('/deezer/track/:id', async (req, res) => {
-    try {
-        const response = await fetch('https://api.deezer.com/track' + req.params.id);
-        const data = await response.json();
-        
-        req.render('tracks/new.ejs', { query: '', data: [data] });
-    } catch (error) {
-        console.log (error);
-        res.render('tracks/new.ejs', { query: '', data: [], error: 'Failed to find track' });
+// Get track info from SoundCloud URL
+router.get('/soundcloud/track', async (req, res) => {
+    const url = req.query.url;
+    if (!url) {
+        return res.json({ success: false, error: 'No URL provided' });
     }
+    
+    // Validate it's a SoundCloud URL
+    if (!url.includes('soundcloud.com')) {
+        return res.json({ success: false, error: 'Not a valid SoundCloud URL' });
+    }
+    
+    const result = await soundcloud.getTrackFromUrl(url);
+    res.json(result);
 });
 
-//GET /api/deezer/artist/:id
-router.get('/deezer/artist/:id', async (req, res) => {
-    try {
-        const response = await fetch('https://api.deezer.com/artist' + req.params.id);
-        const data = await response.json();
-        
-        req.render('tracks/new.ejs', { query: '', data: [data] });
-    } catch (error) {
-        console.log (error);
-        res.render('tracks/new.ejs', { query: '', data: [], error: 'Failed to find artist' });
+// Get stream count from SoundCloud URL
+router.get('/soundcloud/streams', async (req, res) => {
+    const url = req.query.url;
+    if (!url) {
+        return res.json({ success: false, error: 'No URL provided' });
     }
+    
+    const result = await soundcloud.getStreamCount(url);
+    res.json(result);
 });
 
 module.exports = router;
