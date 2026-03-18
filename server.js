@@ -5,6 +5,7 @@ const app = express();
 
 const mongoose = require("mongoose");
 const User = require("./models/user");
+const Track = require("./models/track")
 const tracksController = require("./controllers/tracks.js")
 const { ROLES, PRO_OPTIONS, DAW_OPTIONS } = require('./config/constants');
 const methodOverride = require("method-override");
@@ -81,12 +82,42 @@ app.get("/", async (req, res) => {
 app.use("/auth", authController);
 app.use('/tracks', isSignedIn, tracksController);
 app.use('/api', apiController)
-// Profile routes
-app.get("/hub", isSignedIn, async (req,res) => {
-    const user = await User.findById(req.session.user._id);
-    res.render("profile/hub.ejs", { user });
-});
 
+// Profile routes
+app.get("/hub", isSignedIn, async (req, res) => {
+    try {
+        const user = await User.findById(req.session.user._id);
+        
+        // Get stats for the hub
+        const tracks = await Track.find({ owner: user._id });
+        const trackCount = tracks.length;
+        
+        // Count collaborators and pending
+        let collabCount = 0;
+        let pendingCount = 0;
+        
+        tracks.forEach(function(track) {
+            if (track.collaborators) {
+                collabCount += track.collaborators.length;
+                track.collaborators.forEach(function(collab) {
+                    if (collab.status === 'pending' || collab.status === 'viewed') {
+                        pendingCount++;
+                    }
+                });
+            }
+        });
+        
+        res.render("profile/hub.ejs", { 
+            user,
+            trackCount,
+            collabCount,
+            pendingCount
+        });
+    } catch (error) {
+        console.log(error);
+        res.redirect("/tracks");
+    }
+});
 //PUT
 app.put("/hub", isSignedIn, async (req,res) => {
   try {

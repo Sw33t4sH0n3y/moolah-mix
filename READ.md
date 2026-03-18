@@ -1,6 +1,6 @@
-# 📀 Payout Pitch
+# Moolah M$x 
 
-[payout pitch](https://payoutpitch-8fa758c596dd.herokuapp.com/)
+[moolah-M$x](https://payoutpitch-8fa758c596dd.herokuapp.com/)
 
 **No Shady Splits. Just Solid Ownership.**
  A split sheet management app for musicians, producers, and songwiters who want to protect their work *before* the check clears.
