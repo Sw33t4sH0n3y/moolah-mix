@@ -1,6 +1,7 @@
 <%- include('../../partials/header') %>
 
-<main class="page-container">
+<main class="collabs-page">
+    <div class="page-container">
     <a href="/tracks/<%= track._id %>" class="back-link">← Back to <%= track.title %></a>
 
     <div class="page-header">
@@ -8,12 +9,26 @@
         <a href="/tracks/<%= track._id %>/collaborators/new" class="btn btn-primary">+ Collaborators</a>
     </div>
 
-    <p class="page-subtitle">All credited contributors"<%= track.title %>"</p>
+    <p class="page-subtitle">All credited contributors on "<%= track.title %>"</p>
+
+    <% if (typeof success !== 'undefined' && success) { %>
+    <div class="alert alert-success"><%= success %></div>
+    <% } %>
+
+    <% if (typeof error !== 'undefined' && error) { %>
+        <div class="alert alert-error"><%= error %></div>
+    <% } %>
+
+    <% if (track.isLocked) { %>
+        <div class="locked-notice">
+            🔒 This split sheet is locked. All parties have agreed.
+        </div>
+    <% } %>
 
     <div class="collaborators-list">
         <div class="collab-card owner-card">
             <div class="collab-avatar owner-avatar">
-                <%= (user.displayName || user.username || '').charAt(0).toUpperCase() %>
+                <%= (user.displayName || user.username || 'U').charAt(0).toUpperCase() %>
             </div>
             <div class="collab-info">
                 <div class="collab-name">
@@ -24,7 +39,7 @@
                     <% if (user.roles && user.roles.length > 0) { %>
                         <% user.roles.forEach(role => { %>
                             <% if (ROLES && ROLES[role]) { %>
-                                <span class="role-badge role-badge-<%=role %>">
+                                <span class="role-badge role-badge-<%= role %>">
                                     <%= ROLES[role].icon %> <%= ROLES[role].label %>
                                 </span>
                             <% } %>
@@ -47,7 +62,7 @@
                 <div class="empty-icon">🎤</div>
                 <h1>No Collaborators</h1>
                 <p>Add all contributors</p>
-                <a href="/tracks/<%=track._id %>/collaborators/new" class="btn btn-primary">+ Collaborator</a>
+                <a href="/tracks/<%= track._id %>/collaborators/new" class="btn btn-primary">+ Collaborator</a>
             </div>
         <% } else { %>
             <% track.collaborators.forEach(collab => { %>
@@ -60,47 +75,100 @@
                         <%= collab.name.charAt(0).toUpperCase() %>
                     </div>
                     <div class="collab-info">
-                        <div class="collab-name"><%= collab.name %></div>
+                        <div class="collab-name">
+                            <%= collab.name %>
+                            <span class="status-badge status-<%= collab.status || 'pending' %>">
+                                <% if (collab.status === 'agreed') { %>
+                                    ✅ Agreed
+                                <% } else if (collab.status === 'viewed') { %>
+                                    👀 Viewed
+                                <% } else { %>
+                                    ⏳ Pending
+                                <% } %>
+                            </span>
+                        </div>
                         <div class="collab-roles">
-                        <% if (collab.roles && collab.roles.length > 0) { %>
-                        <% collab.roles.forEach(role => { %>
-                            <% if (ROLES && ROLES[role]) { %>
-                                <span class="role-badge role-badge-<%=role %>">
-                                    <%= ROLES[role].icon %> <%= ROLES[role].label %>
-                                </span>
-                            <% } %>
-                        <% }) %>
-                    <% } else { %>
-                       <span class="text-muted">No set roles</span>
-                    <% } %>              
+                            <% if (collab.roles && collab.roles.length > 0) { %>
+                                <% collab.roles.forEach(role => { %>
+                                    <% if (ROLES && ROLES[role]) { %>
+                                        <span class="role-badge role-badge-<%= role %>">
+                                            <%= ROLES[role].icon %> <%= ROLES[role].label %>
+                                        </span>
+                                    <% } %>
+                                <% }) %>
+                            <% } else { %>
+                               <span class="text-muted">No set roles</span>
+                            <% } %>              
                         </div>
                         <div class="collab-splits">
-                   <span class="split-badge">🎵 Master: <%= masterPct %>%</span>
-                   <span class="split-badge">📝 Publishing: <%= pubPct %>%</span>
+                            <span class="split-badge">🎵 Master: <%= masterPct %>%</span>
+                            <span class="split-badge">📝 Publishing: <%= pubPct %>%</span>
                         </div>
                         <% if (collab.email) { %>
                             <div class="collab-email">
                                 <span class="text-muted">📧 <%= collab.email %></span>
                             </div>
                         <% } %>
-                        <% if (collab.pro) { %>
+                        <% if (collab.writerPro) { %>
                             <div class="collab-pro">
-                                <span class="text-muted">PRO: <%= collab.pro %></span>
-                                <% if (collab.ipi) { %>
-                                <span class="text-muted">IPI: <%= collab.ipi %></span>
+                                <span class="text-muted">PRO: <%= collab.writerPro %></span>
+                                <% if (collab.writerIpi) { %>
+                                    <span class="text-muted">IPI: <%= collab.writerIpi %></span>
                                 <% } %>
                             </div>
-                        <% } %>       
+                        <% } %>
+
+                    <!-- Invite Link Section -->
+                    <div class="invite-link-section">
+                        <label>🔗 Invite Link:</label>
+                        <div class="invite-link-row">
+                            <input type="text" 
+                                    class="invite-link-input" 
+                                    value="http://localhost:3000/tracks/agree/<%= collab.inviteToken %>" 
+                                    readonly 
+                                    id="link-<%= collabId %>">
+                            <button type="button" class="btn btn-small btn-secondary" onclick="copyLink('<%= collabId %>')">
+                                📋 Copy
+                            </button>
+                        </div>                 
+                           <!-- Send Email Button -->
+                        <% if (collab.email) { %>
+                            <form action="/tracks/<%= track._id %>/collaborators/<%= collab._id %>/send-invite" method="POST" style="margin-top: 8px;">
+                                <button type="submit" class="btn btn-small btn-primary">
+                                    📧 Send Invite Email
+                                </button>
+                            </form>
+                        <% } else { %>
+                            <p class="text-muted" style="font-size: 0.75rem; margin-top: 8px;">
+                                ⚠️ No email address — <a href="/tracks/<%= track._id %>/collaborators/<%= collab._id %>/edit">add one</a>
+                            </p>
+                        <% } %>
+                        <% if (collab.agreedAt) { %>
+                            <p class="agreed-info">✅ Agreed on <%= new Date(collab.agreedAt).toLocaleString() %></p>
+                        <% } else if (collab.viewedAt) { %>
+                            <p class="viewed-info">👀 Viewed on <%= new Date(collab.viewedAt).toLocaleString() %></p>
+                        <% } %>
                     </div>
-                    <div class="collab-actions">
-                        <a href="/tracks/<%= track._id %>/collaborators/<%= collab._id %>/edit" class="btn btn-secondary btn-small">✏️ Edit</a>
-                        <form action="/tracks/<%= track._id %>/collaborators/<%= collab._id %>?_method=DELETE" method="POST" class="inline-form">
-                            <button type="submit" class="btn btn-danger btn-small" onclick="return confirm('Remove <%= collab.name %>?')">🗑️</button>
-                        </form>
-                    </div>
+                <% if (collab.signature) { %>
+    <div class="collab-signature">
+        <label>✍️ Signature:</label>
+        <img src="<%= collab.signature %>" alt="<%= collab.name %>'s signature" class="signature-thumbnail">
+        <span class="signature-meta">
+            Signed <%= new Date(collab.agreedAt).toLocaleString() %>
+            via <%= collab.signatureType === 'type' ? 'typed name' : 'drawn signature' %>
+        </span>
+    </div>
+<% } %>    
                 </div>
-            <% }) %>
-        <% } %>        
+                <div class="collab-actions">
+                    <a href="/tracks/<%= track._id %>/collaborators/<%= collab._id %>/edit" class="btn btn-secondary btn-small">✏️ Edit</a>
+                    <form action="/tracks/<%= track._id %>/collaborators/<%= collab._id %>?_method=DELETE" method="POST" class="inline-form">
+                        <button type="submit" class="btn btn-danger btn-small" onclick="return confirm('Remove <%= collab.name %>?')">🗑️</button>
+                    </form>
+                </div>
+            </div>
+        <% }) %>
+    <% } %>        
     </div>
     
     <% if (track.collaborators && track.collaborators.length > 0) { %>
@@ -117,28 +185,56 @@
                 if (track.collaborators && track.splits && track.splits.master && track.splits.master.collaborators) { 
                     track.collaborators.forEach(c => { 
                        masterTotal += track.splits.master.collaborators.get(c._id.toString()) || 0;
-                });
-             } 
-        %>
-        <span class="summary-value <%= masterTotal === 100 ? 'valid' : 'invalid' %>"><%= masterTotal%>%</span>
+                    });
+                } 
+                %>
+                <span class="summary-value <%= masterTotal === 100 ? 'valid' : 'invalid' %>"><%= masterTotal %>%</span>
             </div>
             <div class="summary-item">
                 <span class="summary-label">📝 Publishing Total</span>
                 <% let pubTotal = track.splits && track.splits.publishing ? track.splits.publishing.owner : 100; 
-                if (track.collaborators && track.splits && track.splits.publishing && track.splits.publishing.collaborators) { track.collaborators.forEach(c => { pubTotal += track.splits.publishing.collaborators.get(c._id.toString()) || 0;
-                });
-             } 
-        %>
-        <span class="summary-value <%= pubTotal === 100 ? 'valid' : 'invalid' %>"><%= pubTotal %>%</span>
+                if (track.collaborators && track.splits && track.splits.publishing && track.splits.publishing.collaborators) { 
+                    track.collaborators.forEach(c => { 
+                        pubTotal += track.splits.publishing.collaborators.get(c._id.toString()) || 0;
+                    });
+                } 
+                %>
+                <span class="summary-value <%= pubTotal === 100 ? 'valid' : 'invalid' %>"><%= pubTotal %>%</span>
+            </div>
+            <div class="summary-item">
+                <span class="summary-label">✅ Agreed</span>
+                <span class="summary-value valid"><%= track.collaborators.filter(c => c.status === 'agreed').length %></span>
+            </div>
+            <div class="summary-item">
+                <span class="summary-label">⏳ Pending</span>
+                <span class="summary-value <%= track.collaborators.filter(c => c.status !== 'agreed').length > 0 ? 'invalid' : 'valid' %>">
+                    <%= track.collaborators.filter(c => c.status !== 'agreed').length %>
+                </span>
+            </div>
         </div>
+        <% if (masterTotal !== 100 || pubTotal !== 100) { %>
+            <div class="alert alert-error"> 
+                ⚠️🚨 Splits must equal 100%. <a href="/tracks/<%= track._id %>">Edit splits</a>
+            </div>
+        <% } %>
     </div>
-    <% if (masterTotal !== 100 || pubTotal !== 100) { %>
-        <div class="alert alert-error"> 
-        ⚠️🚨 Splits must equal 100%. <a href="/tracks/<%= track._id %>">Edit splits</a>
-    </div>
-    <% } %>
-</div>
-<% } %>  
+    <% } %>  
 </main>
+
+<script>
+function copyLink(collabId) {
+    const input = document.getElementById('link-' + collabId);
+    input.select();
+    document.execCommand('copy');
+    
+    // Show feedback
+    const btn = input.nextElementSibling;
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '✅ Copied!';
+    setTimeout(function() {
+        btn.innerHTML = originalText;
+    }, 2000);
+}
+</script>
 
 <%- include('../../partials/footer') %>

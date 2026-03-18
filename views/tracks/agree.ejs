@@ -1,0 +1,354 @@
+<%- include('../partials/header') %>
+
+<main class="page-container">
+    <div class="card agree-card">
+        <div class="agree-header">
+            <h1>📄 Split Sheet Agreement</h1>
+            <p class="text-muted">for "<%= track.title %>"</p>
+        </div>
+
+        <div class="agree-welcome">
+            <p>Hey <strong><%= collaborator.name %></strong>,</p>
+            <p>You've been invited to confirm your ownership splits for this track.</p>
+        </div>
+
+        <hr class="form-divider">
+
+        <!-- Track Info -->
+        <section class="agree-section">
+            <h2>🎵 Track Details</h2>
+            <div class="agree-details">
+                <div class="detail-row">
+                    <span>Title</span>
+                    <strong><%= track.title %></strong>
+                </div>
+                <% if (track.releaseDate) { %>
+                <div class="detail-row">
+                    <span>Release Date</span>
+                    <strong><%= new Date(track.releaseDate).toLocaleDateString() %></strong>
+                </div>
+                <% } %>
+                <% if (track.isrc) { %>
+                <div class="detail-row">
+                    <span>ISRC</span>
+                    <strong><%= track.isrc %></strong>
+                </div>
+                <% } %>
+            </div>
+        </section>
+
+        <hr class="form-divider">
+
+        <!-- Your Splits -->
+        <section class="agree-section">
+            <h2>📊 Your Splits</h2>
+            
+            <% const collabId = collaborator._id.toString(); %>
+            <% const masterPct = track.splits?.master?.collaborators?.get(collabId) || 0; %>
+            <% const pubPct = track.splits?.publishing?.collaborators?.get(collabId) || 0; %>
+            
+            <div class="your-splits">
+                <div class="your-split-item">
+                    <span class="split-label">🎵 Master Recording</span>
+                    <span class="split-value"><%= masterPct %>%</span>
+                </div>
+                <div class="your-split-item">
+                    <span class="split-label">📝 Publishing</span>
+                    <span class="split-value"><%= pubPct %>%</span>
+                </div>
+            </div>
+
+            <% if (collaborator.roles && collaborator.roles.length > 0) { %>
+            <div class="your-roles">
+                <span>Your roles: </span>
+                <% collaborator.roles.forEach(role => { %>
+                    <% if (ROLES && ROLES[role]) { %>
+                        <span class="role-badge role-badge-<%= role %>">
+                            <%= ROLES[role].icon %> <%= ROLES[role].label %>
+                        </span>
+                    <% } %>
+                <% }) %>
+            </div>
+            <% } %>
+        </section>
+
+        <hr class="form-divider">
+
+        <!-- All Parties -->
+        <section class="agree-section">
+            <h2>👥 All Parties</h2>
+            
+            <!-- Owner -->
+            <div class="party-item owner">
+                <div class="party-avatar owner-avatar">
+                    <%= (owner.displayName || owner.username || 'U').charAt(0).toUpperCase() %>
+                </div>
+                <div class="party-info">
+                    <div class="party-name"><%= owner.displayName || owner.username %> <span class="owner-badge">👑 Owner</span></div>
+                    <div class="party-splits">
+                        🎵 <%= track.splits?.master?.owner || 100 %>% · 📝 <%= track.splits?.publishing?.owner || 100 %>%
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Other Collaborators -->
+            <% track.collaborators.forEach(c => { %>
+                <% const cId = c._id.toString(); %>
+                <% const cMaster = track.splits?.master?.collaborators?.get(cId) || 0; %>
+                <% const cPub = track.splits?.publishing?.collaborators?.get(cId) || 0; %>
+                
+                <div class="party-item <%= c._id.toString() === collaborator._id.toString() ? 'you' : '' %>">
+                    <div class="party-avatar">
+                        <%= c.name.charAt(0).toUpperCase() %>
+                    </div>
+                    <div class="party-info">
+                        <div class="party-name">
+                            <%= c.name %>
+                            <% if (c._id.toString() === collaborator._id.toString()) { %>
+                                <span class="you-badge">← You</span>
+                            <% } %>
+                        </div>
+                        <div class="party-splits">
+                            🎵 <%= cMaster %>% · 📝 <%= cPub %>%
+                        </div>
+                    </div>
+                    <div class="party-status status-<%= c.status %>">
+                        <% if (c.status === 'agreed') { %>
+                            ✅ Agreed
+                        <% } else if (c.status === 'viewed') { %>
+                            👀 Viewed
+                        <% } else { %>
+                            ⏳ Pending
+                        <% } %>
+                    </div>
+                </div>
+            <% }) %>
+        </section>
+
+        <hr class="form-divider">
+
+        <!-- Agreement Section -->
+        <% if (collaborator.status === 'agreed') { %>
+            <div class="already-agreed">
+                <h3>✅ You've Already Agreed</h3>
+                <p>You signed this agreement on <%= new Date(collaborator.agreedAt).toLocaleString() %></p>
+            <% if (collaborator.signature) { %>
+                    <div class="signature-display">
+                        <p>Your signature:</p>
+                        <img src="<%= collaborator.signature %>" alt="Signature" class="signature-image">    
+            </div>
+            <% } %>
+        <% } else { %>
+            <section class="agree-section">
+                <h2>✍️  Sign Agreement</h2>
+                
+                <div class="legal-text">
+                    <p>By clicking "I Agree" below, I confirm that:</p>
+                    <ul>
+                        <li>I have reviewed the ownership splits above</li>
+                        <li>I agree to the master recording and publishing percentages shown</li>
+                        <li>I understand this constitutes a binding agreement between all parties</li>
+                    </ul>
+                </div>
+
+                <!-- Signature Type Toggle -->
+                <div class="signature-toggle">
+                    <button type="button" class="sig-btn active" id="drawBtn" onclick="showSignatureMode('draw')">
+                        ✏️ Draw Signature
+                    </button>
+                    <button type="button" class="sig-btn" id="typeBtn" onclick="showSignatureMode('type')">
+                        ⌨️ Type Signature
+                    </button>
+                </div>
+
+                <form action="/tracks/agree/<%= token %>" method="POST" id="agreeForm">
+                    <!-- Draw Signature -->
+                    <div id="drawSection" class="signature-section">
+                        <label>Draw your signature below:</label>
+                        <div class="canvas-wrapper">
+                            <canvas id="signatureCanvas" width="500" height="150"></canvas>
+                        </div>
+                        <button type="button" class="btn btn-small btn-secondary" onclick="clearCanvas()">
+                            🗑️ Clear
+                        </button>
+                    </div>
+
+                    <!-- Type Signature -->
+                    <div id="typeSection" class="signature-section hidden">
+                        <label for="typedSignature">Type your full legal name:</label>
+                        <input type="text" id="typedSignature" class="signature-input" placeholder="Your Full Name">
+                        <div class="typed-preview">
+                            <p>Preview:</p>
+                            <div id="signaturePreview" class="signature-text"></div>
+                        </div>
+                    </div>
+
+                    <!-- Hidden fields -->
+                    <input type="hidden" name="signature" id="signatureData">
+                    <input type="hidden" name="signatureType" id="signatureType" value="draw">
+
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="confirmCheck" required>
+                            <span>I have read and agree to the splits shown above</span>
+                        </label>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary btn-large btn-full" id="agreeBtn" disabled>
+                        ✍️ Sign & Agree
+                    </button>
+                </form>
+            </section>
+        <% } %>
+
+        <div class="agree-footer">
+            <p class="text-muted">Powered by Moolah M$x • <%= new Date().toLocaleDateString() %></p>
+        </div>
+    </div>
+</main>
+
+<script>
+    // Canvas setup
+    const canvas = document.querySelector('#signatureCanvas');
+    const ctx = canvas ? canvas.getContext('2d') : null;
+    let isDrawing = false;
+    let lastX = 0;
+    let lastY = 0;
+
+    if (ctx) {
+        ctx.strokeStyle = '#c9a227';
+        ctx.lineWidth = 3;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        // NO background fill - keep transparent
+    }
+
+    // Drawing functions
+    function startDrawing(e) {
+        isDrawing = true;
+        const rect = canvas.getBoundingClientRect();
+        const x = (e.clientX || e.touches[0].clientX) - rect.left;
+        const y = (e.clientY || e.touches[0].clientY) - rect.top;
+        lastX = x;
+        lastY = y;
+    }
+
+    function draw(e) {
+        if (!isDrawing) return;
+        e.preventDefault();
+        
+        const rect = canvas.getBoundingClientRect();
+        const x = (e.clientX || e.touches[0].clientX) - rect.left;
+        const y = (e.clientY || e.touches[0].clientY) - rect.top;
+        
+        ctx.beginPath();
+        ctx.moveTo(lastX, lastY);
+        ctx.lineTo(x, y);
+        ctx.stroke();
+        
+        lastX = x;
+        lastY = y;
+    }
+
+    function stopDrawing() {
+        isDrawing = false;
+    }
+
+    if (canvas) {
+        // Mouse events
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseout', stopDrawing);
+        
+        // Touch events
+        canvas.addEventListener('touchstart', startDrawing);
+        canvas.addEventListener('touchmove', draw);
+        canvas.addEventListener('touchend', stopDrawing);
+    }
+
+    function clearCanvas() {
+        if (ctx) {
+            // Clear to transparent
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+    }
+
+    // Signature mode toggle
+    function showSignatureMode(mode) {
+        const drawSection = document.querySelector('#drawSection');
+        const typeSection = document.querySelector('#typeSection');
+        const drawBtn = document.querySelector('#drawBtn');
+        const typeBtn = document.querySelector('#typeBtn');
+        const signatureType = document.querySelector('#signatureType');
+        
+        if (mode === 'draw') {
+            drawSection.classList.remove('hidden');
+            typeSection.classList.add('hidden');
+            drawBtn.classList.add('active');
+            typeBtn.classList.remove('active');
+            signatureType.value = 'draw';
+        } else {
+            drawSection.classList.add('hidden');
+            typeSection.classList.remove('hidden');
+            drawBtn.classList.remove('active');
+            typeBtn.classList.add('active');
+            signatureType.value = 'type';
+        }
+    }
+
+    // Typed signature preview
+    const typedInput = document.querySelector('#typedSignature');
+    const preview = document.querySelector('#signaturePreview');
+    
+    if (typedInput && preview) {
+        typedInput.addEventListener('input', function() {
+            preview.textContent = this.value || '';
+        });
+    }
+
+    // Form submission
+    const form = document.querySelector('#agreeForm');
+    const checkbox = document.querySelector('#confirmCheck');
+    const agreeBtn = document.querySelector('#agreeBtn');
+    
+    if (checkbox && agreeBtn) {
+        checkbox.addEventListener('change', function() {
+            agreeBtn.disabled = !this.checked;
+        });
+    }
+
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            const signatureType = document.querySelector('#signatureType').value;
+            const signatureData = document.querySelector('#signatureData');
+            
+            if (signatureType === 'draw') {
+                // Convert canvas to base64 PNG (transparent)
+                signatureData.value = canvas.toDataURL('image/png');
+            } else {
+                // Convert typed name to image
+                const name = document.querySelector('#typedSignature').value;
+                if (!name.trim()) {
+                    e.preventDefault();
+                    alert('Please type your name to sign.');
+                    return;
+                }
+                // Create a canvas with transparent background
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = 500;
+                tempCanvas.height = 100;
+                const tempCtx = tempCanvas.getContext('2d');
+                // Clear to transparent (don't fill with any color)
+                tempCtx.clearRect(0, 0, tempCanvas.width, tempCanvas.height);
+                tempCtx.font = 'italic 48px "Brush Script MT", cursive';
+                tempCtx.fillStyle = '#c9a227';
+                tempCtx.textAlign = 'center';
+                tempCtx.textBaseline = 'middle';
+                tempCtx.fillText(name, tempCanvas.width / 2, tempCanvas.height / 2);
+                signatureData.value = tempCanvas.toDataURL('image/png');
+            }
+        });
+    }
+</script>
+<%- include('../partials/footer') %>
