@@ -28,7 +28,9 @@ roles: [String],
     writerIpi: String,
     publishingCompany: String,
     publisherPro: String,
-    publisherIpi: String
+    publisherIpi: String,
+    resetToken: String,
+    resetTokenExpires: Date
 }, {
     timestamps: true
 }); 

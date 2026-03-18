@@ -1,10 +1,22 @@
 const mongoose = require('mongoose');
+const crypto = require('crypto')
 
 const trackSchema = new mongoose.Schema({
     title: {
         type: String,
         default: '',
     },
+    artists: [{
+    name: {
+        type: String,
+        default: ''
+    },
+    role: {
+        type: String,
+        enum: ['primary', 'featured', 'remix', 'producer'],
+        default: 'primary'
+    }
+}],
     releaseDate: {
         type: String,
         default: '',
@@ -34,11 +46,36 @@ const trackSchema = new mongoose.Schema({
         writerIpi: String,
         publishingCompany: String,
         publisherPro: String,
-        publisherIpi: String
+        publisherIpi: String,
+
+        status: {
+            type: String,
+            enum: ['pending', 'viewed', 'agreed', 'disputed'],
+            default: 'pending'
+        },
+        inviteToken: {
+            type: String,
+            default: function() {
+                return crypto.randomBytes(16).toString('hex');
+            }
+        },
+        viewedAt: Date,
+        agreedAt: Date,
+        agreedFromIP: String,
+        inviteSentAt: Date,
+        signature: {
+            type: String,
+            default: null
+        },
+        signatureType: {
+            type: String,
+            enum: ['draw', 'type', null],
+            default: null
+        }    
     }],
     splits: {
         master: {
-            user: {
+            owner: {
                 type: Number,
                 default: 100
             },
@@ -49,7 +86,7 @@ const trackSchema = new mongoose.Schema({
             }    
     },
     publishing: {
-        user: {
+        owner: {
             type: Number,
             default: 100
     },       
@@ -59,7 +96,37 @@ const trackSchema = new mongoose.Schema({
             default: {}
            }
         }
-    }
+    },
+    isLocked: {
+        type: Boolean,
+        default: false
+    },
+    isLockedAt: Date,
+    allAgreed: {
+        type: Boolean,
+        default: false
+    },
+soundcloudId: {
+    type: String,
+    default: ''
+},
+soundcloudUrl: {
+    type: String,
+    default: ''
+},
+soundcloudArtwork: {
+    type: String,
+    default: ''
+},
+soundcloudPlays: {
+    type: Number,
+    default: 0
+},
+trackSource: {
+    type: String,
+    enum: ['manual', 'soundcloud', 'deezer'],
+    default: 'manual'
+}
  }, { 
     timestamps: true
 });
