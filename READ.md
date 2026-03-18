@@ -1,4 +1,5 @@
 # 💰 Moolah M$X
+
 [Moolah M$x](https://moolah-mix-5fc7bead314b.herokuapp.com/)
 
 **Stack Your Splits. Secure Your Bag.**
@@ -99,7 +100,7 @@ Split sheets get lost. Handshake deals are forgotten. When the royalties roll in
 - [ ] Live SoundCloud stream count for revenue calculator
 
 ### 🔮 Future
-- [ ] Stripe payment integration
+- [ ] Payment integration
 - [ ] Mobile app
 - [ ] Contract templates
 - [ ] Audit trail / version history
@@ -119,7 +120,6 @@ Split sheets get lost. Handshake deals are forgotten. When the royalties roll in
 **Moolah M$X** is the reimagined evolution of **Payout-Pitch**. Same mission, leveled-up execution.
 
 What changed:
-- 🎨 Full rebrand with green & gold wealth aesthetic
 - 🔊 SoundCloud integration (replaced Deezer)
 - ✍️ E-signatures for collaborator agreements
 - 📧 Email notifications

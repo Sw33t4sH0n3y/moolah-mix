@@ -1,0 +1,27 @@
+<%- include('../partials/header') %>
+
+<main class="hub-page">
+    <div class="page-container">
+        <div class="card limit-card">
+            <div class="limit-icon">🔒</div>
+            <h1>Track Limit Reached</h1>
+            <p>You've created <strong><%= trackCount %></strong> of <strong><%= limit %></strong> tracks allowed in the beta.</p>
+            
+            <div class="limit-options">
+                <h3>What now?</h3>
+                <ul>
+                    <li>✏️ Edit or delete existing tracks to free up space</li>
+                    <li>📧 Request more tracks by giving feedback</li>
+                    <li>🚀 Pro accounts coming soon with unlimited tracks!</li>
+                </ul>
+            </div>
+            
+            <div class="limit-actions">
+                <a href="/tracks" class="btn btn-primary">Manage My Songs</a>
+                <a href="https://forms.gle/YOUR_GOOGLE_FORM_ID" target="_blank" class="btn btn-secondary">Request More Tracks</a>
+            </div>
+        </div>
+    </div>
+</main>
+
+<%- include('../partials/footer') %>

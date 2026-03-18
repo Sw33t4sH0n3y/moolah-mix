@@ -5,6 +5,7 @@ const User = require('../models/user');
 const { ROLES, PRO_OPTIONS, DAW_OPTIONS} = require('../config/constants');
 const PDFDocument = require('pdfkit');
 const { sendInviteEmail, sendAgreementConfirmation } = require('../services/email');
+const checkTrackLimit = require('../middleware/check-limits');
 
 // GET /tracks
 router.get('/', async (req, res) => {
@@ -18,12 +19,12 @@ router.get('/', async (req, res) => {
 });
 
 //GET /tracks/new
-router.get('/new', (req, res) => {
+router.get('/new', checkTrackLimit, (req, res) => {
     res.render('tracks/new.ejs');
 });
 
 //POST /tracks - create new track
-router.post('/', async (req, res) => {
+router.post('/', checkTrackLimit, async (req, res) => {
     try {
         const trackData = {
             ...req.body,

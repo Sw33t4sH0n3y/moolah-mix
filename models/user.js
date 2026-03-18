@@ -30,7 +30,16 @@ roles: [String],
     publisherPro: String,
     publisherIpi: String,
     resetToken: String,
-    resetTokenExpires: Date
+    resetTokenExpires: Date,
+    plan: {
+    type: String,
+    enum: ['beta', 'free', 'pro'],
+    default: 'beta'
+},
+trackLimit: {
+    type: Number,
+    default: 5
+    }
 }, {
     timestamps: true
 }); 
