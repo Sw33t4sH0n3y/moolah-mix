@@ -13,6 +13,41 @@
                 <input type="text" id="title" name="title" required value="<%= track.title %>">
             </div>
 
+            <div class="form-group">
+    <label>★ Artists ★</label>
+    <div id="artistsContainer">
+        <% if (track.artists && track.artists.length > 0) { %>
+            <% track.artists.forEach(function(artist, index) { %>
+                <div class="artist-row">
+                    <input type="text" name="artists[<%= index %>][name]" value="<%= artist.name %>" placeholder="Artist/stage name" class="artist-name-input">
+                    <select name="artists[<%= index %>][role]" class="artist-role-select">
+                        <option value="primary" <%= artist.role === 'primary' ? 'selected' : '' %>>Primary</option>
+                        <option value="featured" <%= artist.role === 'featured' ? 'selected' : '' %>>Featured</option>
+                        <option value="remix" <%= artist.role === 'remix' ? 'selected' : '' %>>Remix</option>
+                        <option value="producer" <%= artist.role === 'producer' ? 'selected' : '' %>>Producer</option>
+                    </select>
+                    <button type="button" class="btn btn-small btn-danger remove-artist-btn" onclick="removeArtist(this)" <%= track.artists.length === 1 ? 'style="display:none;"' : '' %>>✕</button>
+                </div>
+            <% }) %>
+        <% } else { %>
+            <div class="artist-row">
+                <input type="text" name="artists[0][name]" placeholder="Artist/stage name" class="artist-name-input">
+                <select name="artists[0][role]" class="artist-role-select">
+                    <option value="primary">Primary</option>
+                    <option value="featured">Featured</option>
+                    <option value="remix">Remix</option>
+                    <option value="producer">Producer</option>
+                </select>
+                <button type="button" class="btn btn-small btn-danger remove-artist-btn" onclick="removeArtist(this)" style="display:none;">✕</button>
+            </div>
+        <% } %>
+    </div>
+    <button type="button" class="btn btn-small btn-secondary" onclick="addArtist()">+ Add Another Artist</button>
+</div>
+<!-- END ARTISTS SECTION -->
+
+<div class="form-row">
+
             <div class="form-row">
                 <div class="form-group">
                     <label for="releaseDate">Drop Date</label>
@@ -41,5 +76,42 @@
         </form>
     </div>
 </main>
+
+<input type="hidden" id="artistCountData" value="<% if (track.artists && track.artists.length > 0) { %><%= track.artists.length %><% } else { %>1<% } %>">
+<script>
+let artistCount = parseInt(document.querySelector('#artistCountData').value) || 1;
+
+function addArtist() {
+        const container = document.querySelector('#artistsContainer');
+        const newRow = document.createElement('div');
+        newRow.className = 'artist-row';
+        newRow.innerHTML = '<input type="text" name="artists[' + artistCount + '][name]" placeholder="Artist/stage name" class="artist-name-input">' +
+            '<select name="artists[' + artistCount + '][role]" class="artist-role-select">' +
+            '<option value="primary">Primary</option>' +
+            '<option value="featured">Featured</option>' +
+            '<option value="remix">Remix</option>' +
+            '<option value="producer">Producer</option>' +
+            '</select>' +
+            '<button type="button" class="btn btn-small btn-danger remove-artist-btn" onclick="removeArtist(this)">✕</button>';
+        container.appendChild(newRow);
+        artistCount++;
+        updateRemoveButtons();
+    }
+
+    function removeArtist(btn) {
+        btn.parentElement.remove();
+        updateRemoveButtons();
+    }
+
+    function updateRemoveButtons() {
+        const rows = document.querySelectorAll('.artist-row');
+        rows.forEach(function(row) {
+            const removeBtn = row.querySelector('.remove-artist-btn');
+            if (removeBtn) {
+                removeBtn.style.display = rows.length > 1 ? 'inline-block' : 'none';
+            }
+        });
+    }
+</script>
 
 <%- include('../partials/footer') %>
