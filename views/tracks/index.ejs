@@ -1,19 +1,20 @@
 <%- include('../partials/header') %>
 
-<main class="page-container">
-    <div class="page-header">
-        <h1>My Songs</h1>
-        <a href="/tracks/new" class="btn btn-primary">+ New Song</a>
-    </div>
-
-    <% if (tracks.length === 0) { %>
-    
-        <div class="empty-state">
-            <div class="empty-state">🎵</div>
-            <h2>Songs Empty</h2>
-            <p>Begin catalog management by documenting ownership rights.</p>
-            <a href="/tracks/new" class="btn btn-primary">Compose First Song</a>
+<main class="tracks-page">
+    <div class="page-container">
+        <div class="page-header">
+            <h1>My Songs</h1>
+            <a href="/tracks/new" class="btn btn-primary">+ New Song</a>
         </div>
+
+        <% if (tracks.length === 0) { %>
+        
+            <div class="empty-state">
+                <div class="empty-icon">🎵</div>
+                <h2>Songs Empty</h2>
+                <p>Begin catalog management by documenting ownership rights.</p>
+                <a href="/tracks/new" class="btn btn-primary">Compose First Song</a>
+            </div>
         <% } else { %>
             <div class="tracks-grid">
                 <% tracks.forEach(track => { %>
@@ -24,6 +25,13 @@
 
                         <div class="track-info">
                             <h3 class="track-title"><%= track.title %></h3>
+                            <div class="track-artists">
+                            <% if (track.artists && track.artists.length > 0) { %>
+                                <% track.artists.forEach(function(artist, index) { %>
+                                    <%= artist.name %><% if (artist.role === 'featured') { %> (ft.)<% } %><% if (index < track.artists.length - 1) { %>, <% } %>
+                                <% }) %>
+                            <% } %>
+                        </div>
                             <div class="track-meta">
                                 <span class="status-badge status-<%= track.status %>">
                                     <%= track.status %>
@@ -34,9 +42,10 @@
                         
                         <div class="track-arrow">→</div>
                     </a> 
-            <% }) %>
+                <% }) %>
             </div>
-   <% } %>
+        <% } %>
+    </div>
 </main>
 
 <%- include('../partials/footer') %>
