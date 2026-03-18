@@ -1,57 +1,101 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="/style.css" />
-    <title>Payout Pitch | No Shady Splits, Just Solid Ownership</title>
-  </head>
-  <body>
-    <%- include ('partials/header') %>
+<%- include('partials/header') %>
 
-      <main class="landing-page">
-        <section class="hero">
+<main class="landing-page">
+    <section class="hero-vinyl">
+        
+        <!-- Top: Tag and Title -->
+        <div class="hero-top-text">
+            <p class="hero-tag">Split sheets made simple</p>
+            <h1 class="hero-title">
+                <span class="curve-top">Stack Your <span class="text-gold">Splits</span>,</span>
+                <span class="curve-bottom">Secure Your <span class="text-green">Bag</span></span>
+            </h1>
+        </div>
 
-          <div class="hero-content">
-            <h1 class="hero-title">No Shady Splits, Just Solid Ownership</h1>
-            <p class="hero-subtitle">
-              Professional Splitsheets for independent artists. Document collaborations, manage splits, protect your work.</p>
-              <div class="hero-actions">
-               <a href="/auth/sign-up" class="btn btn-primary btn-large">Get Started Free</a>
-               <a href="/auth/sign-in" class="btn btn-secondary btn-large">Sign In</a>
-              </div>
+        <!-- Large Vinyl Record -->
+        <div class="mega-vinyl" id="vinylRecord">
+            <div class="mega-vinyl-record">
+                <div class="mega-grooves"></div>
+                <div class="mega-label">
+                    <img src="/images/Moolah_Mix_Logo.png" alt="Moolah M$X" class="mega-logo">
+                </div>
             </div>
-        </section>
-      
-       <section class="features">
+            
+            <!-- Static content inside record (counter-spins to stay still) -->
+            <div class="vinyl-static-content">
+                <p class="hero-subtitle">
+                    Professional split sheets for independent artists.<br>
+                    Document ownership, manage collaborators, protect your royalties.
+                </p>
+                
+                <div class="vinyl-buttons">
+                    <a href="/auth/sign-up" class="vinyl-btn vinyl-btn-primary">
+                        <span class="btn-icon">🚀</span>
+                        <span class="btn-text">Start Free</span>
+                    </a>
+                    <a href="/auth/sign-in" class="vinyl-btn vinyl-btn-secondary">
+                        <span class="btn-icon">🔑</span>
+                        <span class="btn-text">Sign In</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </section>
+  
+    <section class="features" id="features">
         <h2 class="section-title">One Stop. Zero Compromises</h2>
 
         <div class="feature-grid">
-          <div class="feature-card">
-            <div class="feature-icon">📝</div>
-            <h3>Protect the Percentages</h3>
-            <p>No blurred lines: Industry-standard ownership tracking. Masters and publishing split clearly.</p>
-        </div>
+            <div class="feature-card">
+                <div class="feature-icon">📝</div>
+                <h3>Protect the Percentages</h3>
+                <p>No blurred lines: Industry-standard ownership tracking. Masters and publishing split clearly.</p>
+            </div>
 
-        <div class="feature-card">
-          <div class="feature-icon">📊</div>
-          <h3>Track Percentages</h3>
-          <p>Zero Guesswork. Splits locked at 100%</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">📤</div>
-        <h3>Export & Share</h3>
-       <p>Download it. Share indusrty standard splitsheets for labels, distributors, and PROs.</p>
-       </div>
-        </div>
-       </div> 
-     </section> 
-   </main>
-       
-   <footer class="main-footer">
-    <p>🎵 Payout Pitch &copy; <%=new Date().getFullYear() %> Own Your Sound</p>
-   </footer>
-  </body>
-</html>
+            <div class="feature-card">
+                <div class="feature-icon">📊</div>
+                <h3>Track Percentages</h3>
+                <p>Zero Guesswork. Splits locked at 100%</p>
+            </div>
 
+            <div class="feature-card">
+                <div class="feature-icon">📤</div>
+                <h3>Export & Share</h3>
+                <p>Download it. Share industry standard splitsheets for labels, distributors, and PROs.</p>
+            </div>
+        </div>
+    </section>
+</main>
 
+<!-- Vinyl scratch sound -->
+<audio id="vinylScratch" preload="auto">
+    <source src="/sounds/Vinyl_Dead_Wax.wav" type="audio/wav">
+</audio>
+
+<script>
+    const vinyl = document.getElementById('vinylRecord');
+    const scratchSound = document.getElementById('vinylScratch');
+    
+    // Preload the sound
+    scratchSound.load();
+    
+    vinyl.addEventListener('mouseenter', function() {
+        scratchSound.currentTime = 0;
+        scratchSound.volume = 0.4;
+        scratchSound.play().catch(function() {
+            // Sound blocked until user interaction
+        });
+    });
+    
+    // Enable audio on first click anywhere
+    document.addEventListener('click', function enableAudio() {
+        scratchSound.play().then(function() {
+            scratchSound.pause();
+            scratchSound.currentTime = 0;
+        }).catch(function() {});
+        document.removeEventListener('click', enableAudio);
+    });
+</script>
+
+<%- include('partials/footer') %>
