@@ -1,101 +1,105 @@
 <%- include('../partials/header') %>
 
-<main class="page-container">
+<main class="new-track-page">
+    <div class="page-container">
     <a href="/tracks" class="back-link">← Back to Songs</a>
 
     <div class="card track-form-card">
         <h1>Cue the new Song</h1>
 
         <div class="track-source-toggle">
-            <button type="button" class="source-btn active" id="deezerBtn" onclick="showSource('deezer')">
-              🔎 Search Deezer  
+            <button type="button" class="source-btn active" id="soundcloudBtn" onclick="showSource('soundcloud')">
+              🔊 Search SoundCloud  
+            </button>
+            <button type="button" class="source-btn" id="urlBtn" onclick="showSource('url')">
+              🔗 Paste URL
             </button>
             <button type="button" class="source-btn" id="manualBtn" onclick="showSource('manual')">
               ✍️ Cue your own Song
             </button>
         </div>
 
-            <div id="deezerSection" class="source-section">
-                <form action="/api/deezer/search" method="GET" class="search-form">
-                    <div class="form-group">
-                       <label for="q">🔎 Search Deezer</label>
-                       <div class="search-input-group">
-                <input type="text" id="q" name="q" value="<%=typeof query !== 'undefined' ? query : '' %>" placeholder="Track it down....">
-                <button type="submit" class="btn btn-primary">Search</button>
+        <!-- SoundCloud Search Section -->
+        <div id="soundcloudSection" class="source-section">
+            <div class="form-group">
+                <label for="scSearch">🔊 Search SoundCloud</label>
+                <div class="search-input-group">
+                    <input type="text" id="scSearch" placeholder="Track it down....">
+                    <button type="button" class="btn btn-primary" onclick="searchSoundCloud()">Search</button>
                 </div>
                 <span class="form-hint">Find it. We do the typing for you</span>
             </div>
-            </form>
 
-            <% if (typeof data !== 'undefined' && data && data.length > 0) { %>
-            <div class="search-results">
-                <h3>Search Results</h3>
-                <% data.forEach(function(track) { %>
-                    <div class="search-result-item" data-title="<%=track.title %>" data-artist="<%=track.artist ? track.artist.name : ''%>" data-album="<%= track.album ? track.album.title : '' %>" data-id="<%= track.id %>"
-                        data-preview="<%= track.preview || '' %>" data-cover="<%= track.album ? track.album.cover_medium : ''%>" onclick="selectTrack(this)">
-                    <% if (track.album && track.album.cover_small) { %>
-                        <img src="<%=track.album.cover_small %>" alt="" class="result-cover">
-                        <% } %>
-                        <div class="result-info">
-                            <div class="result-title"><%= track.title %></div>
-                            <div class="result-artist"><%= track.artist ? track.artist.name : 'Unknown Artist' %></div>
-                        </div>
-                        <span class="result-duration">
-                            <% if (track.duration) { %>
-                                <%= Math.floor(track.duration/60) %>:<%= (track.duration % 60).toString().padStart(2, '0') %>
-                            <% } %>
-                        </span>
-                    </div>                
-                <% }) %>
-            </div>
-        <% } else if (typeof query !== 'undefined' && query) { %>
-            <p class="text-muted">No results found for "<%= query %>"</p> 
-        <% } %>
-    </div>               
-
-    <div id="manualSection" class="source-section hidden">
-        <div class="manual-info">
-            <p>Build your song your way,enter the deets.</p>
+            <div id="scResults" class="search-results"></div>
         </div>
-    </div>
 
-    <% if (typeof error !== 'undefined' && error) { %>
-        <div class="alert alert-error"><%= error %></div>
-    <% } %>    
+        <!-- URL Import Section -->
+        <div id="urlSection" class="source-section hidden">
+            <div class="form-group">
+                <label for="scUrl">🔗 Paste SoundCloud URL</label>
+                <div class="search-input-group">
+                    <input type="text" id="scUrl" placeholder="https://soundcloud.com/artist/track">
+                    <button type="button" class="btn btn-primary" onclick="importFromUrl()">Import</button>
+                </div>
+                <span class="form-hint">Paste the full SoundCloud track URL</span>
+            </div>
 
-    <hr class="form-divider">
+            <div id="scUrlResult"></div>
+        </div>               
 
+        <div id="manualSection" class="source-section hidden">
+            <div class="manual-info">
+                <p>Build your song your way, enter the deets.</p>
+            </div>
+        </div>
 
-    <form action="/tracks" method="POST">
+        <% if (typeof error !== 'undefined' && error) { %>
+            <div class="alert alert-error"><%= error %></div>
+        <% } %>    
+
+        <hr class="form-divider">
+
+        <form action="/tracks" method="POST">
             <div class="form-group">
                 <label for="title">★ Song Title ★</label>
                 <input type="text" id="title" name="title" required placeholder="Song Title">
             </div>
 
-            <div class="form-group">
-                <label for="artistName">★ Artist Name ★</label>
-                <input type="text" id="artistName" name="artistName" placeholder="Artist/stage name">
-            </div>
+<div class="form-group">
+    <label>★ Artists ★</label>
+    <div id="artistsContainer">
+        <div class="artist-row">
+            <input type="text" name="artists[0][name]" placeholder="Artist/stage name" class="artist-name-input">
+            <select name="artists[0][role]" class="artist-role-select">
+                <option value="primary">Primary</option>
+                <option value="featured">Featured</option>
+                <option value="remix">Remix</option>
+                <option value="producer">Producer</option>
+            </select>
+            <button type="button" class="btn btn-small btn-danger remove-artist-btn" onclick="removeArtist(this)" style="display:none;">✕</button>
+        </div>
+    </div>
+    <button type="button" class="btn btn-small btn-secondary" onclick="addArtist()">+ Add Another Artist</button>
+</div>
 
             <div class="form-group">
                 <label for="albumName">★ Album / Project Name ★</label>
                 <input type="text" id="albumName" name="albumName" placeholder="Album or single">
             </div>
 
-            
             <div class="form-row">
-            <div class="form-group">
-                <label for="releaseDate">Drop Date</label>
-                <input type="date" id="releaseDate" name="releaseDate">
-            </div>
+                <div class="form-group">
+                    <label for="releaseDate">Drop Date</label>
+                    <input type="date" id="releaseDate" name="releaseDate">
+                </div>
 
-            <div class="form-group">
-                <label for="status">Drop Status</label>
-                <select id="status" name="status">
-                    <option value="draft">Draft</option>
-                    <option value="unreleased">Unreleased</option>
-                    <option value="released">Released</option>
-                </select>
+                <div class="form-group">
+                    <label for="status">Drop Status</label>
+                    <select id="status" name="status">
+                        <option value="draft">Draft</option>
+                        <option value="unreleased">Unreleased</option>
+                        <option value="released">Released</option>
+                    </select>
                 </div>
             </div>
 
@@ -109,69 +113,257 @@
                 <label for="genre">Genre</label>
                 <input type="text" id="genre" name="genre" placeholder="e.g., Reggae, Hip-Hop, R&B">
             </div>
-        </div>
-        
+
             <div class="form-group">
                 <label for="notes">Notes</label>
                 <textarea id="notes" name="notes" rows="3" placeholder="More deets"></textarea>
             </div>
 
-            <input type="hidden" id="deezerId" name="deezerId">
-            <input type="hidden" id="deezerPreview" name="deezerPreview">
-            <input type="hidden" id="deezerCover" name="deezerCover">
+            <input type="hidden" id="soundcloudId" name="soundcloudId">
+            <input type="hidden" id="soundcloudUrl" name="soundcloudUrl">
+            <input type="hidden" id="soundcloudArtwork" name="soundcloudArtwork">
+            <input type="hidden" id="soundcloudPlays" name="soundcloudPlays">
             <input type="hidden" id="trackSource" name="trackSource" value="manual">
-
 
             <div class="form-actions">
                 <a href="/tracks" class="btn btn-secondary">Abort</a>
                 <button type="submit" class="btn btn-primary">Create Song</button>
             </div>
         </form>
+      </div>
     </div>
 </main>
 
 <script>
+    let artistCount = 1;
+
+function addArtist() {
+    const container = document.querySelector('#artistsContainer');
+    const newRow = document.createElement('div');
+    newRow.className = 'artist-row';
+    newRow.innerHTML = '<input type="text" name="artists[' + artistCount + '][name]" placeholder="Artist/stage name" class="artist-name-input">' +
+        '<select name="artists[' + artistCount + '][role]" class="artist-role-select">' +
+        '<option value="primary">Primary</option>' +
+        '<option value="featured">Featured</option>' +
+        '<option value="remix">Remix</option>' +
+        '<option value="producer">Producer</option>' +
+        '</select>' +
+        '<button type="button" class="btn btn-small btn-danger remove-artist-btn" onclick="removeArtist(this)">✕</button>';
+    container.appendChild(newRow);
+    artistCount++;
+    
+    // Show remove buttons if more than 1 artist
+    updateRemoveButtons();
+}
+
+function removeArtist(btn) {
+    btn.parentElement.remove();
+    updateRemoveButtons();
+}
+
+function updateRemoveButtons() {
+    const rows = document.querySelectorAll('.artist-row');
+    rows.forEach(function(row, index) {
+        const removeBtn = row.querySelector('.remove-artist-btn');
+        if (removeBtn) {
+            removeBtn.style.display = rows.length > 1 ? 'inline-block' : 'none';
+        }
+    });
+}
+
     function showSource(source) {
-        const deezerSection = document.querySelector('#deezerSection');
+        const soundcloudSection = document.querySelector('#soundcloudSection');
+        const urlSection = document.querySelector('#urlSection');
         const manualSection = document.querySelector('#manualSection');
-        const deezerBtn = document.querySelector('#deezerBtn');
+        const soundcloudBtn = document.querySelector('#soundcloudBtn');
+        const urlBtn = document.querySelector('#urlBtn');
         const manualBtn = document.querySelector('#manualBtn');
         const trackSource = document.querySelector('#trackSource');
 
-        if (source === 'deezer') {
-            deezerSection.classList.remove('hidden');
-            manualSection.classList.add('hidden');
-            deezerBtn.classList.add('active');
-            manualBtn.classList.remove('active');
-            trackSource.value = 'deezer';
-        } else {
-            deezerSection.classList.add('hidden');
-            manualSection.classList.remove('hidden');
-            deezerBtn.classList.remove('active');
-            manualBtn.classList.add('active');
-            trackSource.value ='manual';
+        // Reset all
+        soundcloudSection.classList.add('hidden');
+        urlSection.classList.add('hidden');
+        manualSection.classList.add('hidden');
+        soundcloudBtn.classList.remove('active');
+        urlBtn.classList.remove('active');
+        manualBtn.classList.remove('active');
 
-            document. querySelector('#deezerId').value = '';
-            document. querySelector('#deezerPreview').value = '';
-            document. querySelector('#deezerCover').value = '';
+        if (source === 'soundcloud') {
+            soundcloudSection.classList.remove('hidden');
+            soundcloudBtn.classList.add('active');
+            trackSource.value = 'soundcloud';
+        } else if (source === 'url') {
+            urlSection.classList.remove('hidden');
+            urlBtn.classList.add('active');
+            trackSource.value = 'soundcloud';
+        } else {
+            manualSection.classList.remove('hidden');
+            manualBtn.classList.add('active');
+            trackSource.value = 'manual';
+
+            // Clear SoundCloud data
+            document.querySelector('#soundcloudId').value = '';
+            document.querySelector('#soundcloudUrl').value = '';
+            document.querySelector('#soundcloudArtwork').value = '';
+            document.querySelector('#soundcloudPlays').value = '';
+        }
+    }
+
+    function searchSoundCloud() {
+        const query = document.querySelector('#scSearch').value.trim();
+        if (!query) return;
+
+        const resultsDiv = document.querySelector('#scResults');
+        resultsDiv.innerHTML = '<p class="text-muted">🔄 Searching SoundCloud...</p>';
+
+        fetch('/api/soundcloud/search?q=' + encodeURIComponent(query))
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                if (data.success && data.tracks.length > 0) {
+                    let html = '<h3>Search Results</h3>';
+                    data.tracks.forEach(function(track) {
+                        html += '<div class="search-result-item" ';
+                        html += 'data-title="' + escapeAttr(track.title) + '" ';
+                        html += 'data-artist="' + escapeAttr(track.artist) + '" ';
+                        html += 'data-id="' + escapeAttr(track.id) + '" ';
+                        html += 'data-url="' + escapeAttr(track.url) + '" ';
+                        html += 'data-artwork="' + escapeAttr(track.artwork || '') + '" ';
+                        html += 'data-plays="' + (track.playCount || 0) + '" ';
+                        html += 'data-genre="' + escapeAttr(track.genre || '') + '" ';
+                        html += 'onclick="selectTrack(this)">';
+                        
+                        if (track.artwork) {
+                            html += '<img src="' + track.artwork + '" alt="" class="result-cover">';
+                        } else {
+                            html += '<div class="result-cover result-cover-placeholder">🔊</div>';
+                        }
+                        
+                        html += '<div class="result-info">';
+                        html += '<div class="result-title">' + escapeHtml(track.title) + '</div>';
+                        html += '<div class="result-artist">' + escapeHtml(track.artist) + '</div>';
+                        html += '<div class="result-meta">' + formatNumber(track.playCount) + ' plays</div>';
+                        html += '</div>';
+                        html += '<span class="result-duration">' + track.durationFormatted + '</span>';
+                        html += '</div>';
+                    });
+                    resultsDiv.innerHTML = html;
+                } else {
+                    resultsDiv.innerHTML = '<p class="text-muted">No results found</p>';
+                }
+            })
+            .catch(function(err) {
+                resultsDiv.innerHTML = '<p class="text-error">Error searching SoundCloud</p>';
+            });
+    }
+
+    function importFromUrl() {
+        const url = document.querySelector('#scUrl').value.trim();
+        if (!url) return;
+
+        if (!url.includes('soundcloud.com')) {
+            document.querySelector('#scUrlResult').innerHTML = '<p class="text-error">Please enter a valid SoundCloud URL</p>';
+            return;
         }
 
+        const resultDiv = document.querySelector('#scUrlResult');
+        resultDiv.innerHTML = '<p class="text-muted">🔄 Fetching track info...</p>';
+
+        fetch('/api/soundcloud/track?url=' + encodeURIComponent(url))
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                if (data.success) {
+                    const track = data.track;
+                    let html = '<div class="search-result-item selected" ';
+                    html += 'data-title="' + escapeAttr(track.title) + '" ';
+                    html += 'data-artist="' + escapeAttr(track.artist) + '" ';
+                    html += 'data-id="' + escapeAttr(track.id) + '" ';
+                    html += 'data-url="' + escapeAttr(track.url) + '" ';
+                    html += 'data-artwork="' + escapeAttr(track.artwork || '') + '" ';
+                    html += 'data-plays="' + (track.playCount || 0) + '" ';
+                    html += 'data-genre="' + escapeAttr(track.genre || '') + '" ';
+                    html += 'onclick="selectTrack(this)">';
+                    
+                    if (track.artwork) {
+                        html += '<img src="' + track.artwork + '" alt="" class="result-cover">';
+                    } else {
+                        html += '<div class="result-cover result-cover-placeholder">🔊</div>';
+                    }
+                    
+                    html += '<div class="result-info">';
+                    html += '<div class="result-title">' + escapeHtml(track.title) + '</div>';
+                    html += '<div class="result-artist">' + escapeHtml(track.artist) + '</div>';
+                    html += '<div class="result-meta">' + formatNumber(track.playCount) + ' plays</div>';
+                    html += '</div>';
+                    html += '<span class="result-duration">' + track.durationFormatted + '</span>';
+                    html += '</div>';
+                    html += '<p class="text-success">✅ Click the track above to use it</p>';
+                    resultDiv.innerHTML = html;
+                } else {
+                    resultDiv.innerHTML = '<p class="text-error">' + data.error + '</p>';
+                }
+            })
+            .catch(function(err) {
+                resultDiv.innerHTML = '<p class="text-error">Error fetching track info</p>';
+            });
     }
 
     function selectTrack(element) {
-        document.querySelector('#title').value = element.dataset.title;
-        document.querySelector('#artistName').value = element.dataset.artist;
-        document.querySelector('#albumName').value = element.dataset.album;
-        document.querySelector('#deezerId').value = element.dataset.id;
-        document.querySelector('#deezerPreview').value = element.dataset.preview;
-        document.querySelector('#deezerCover').value = element.dataset.cover;
-        document.querySelector('#trackSource').value = 'deezer';
+        document.querySelector('#title').value = element.dataset.title || '';
+        document.querySelector('#artistName').value = element.dataset.artist || '';
+        document.querySelector('#genre').value = element.dataset.genre || '';
+        document.querySelector('#soundcloudId').value = element.dataset.id || '';
+        document.querySelector('#soundcloudUrl').value = element.dataset.url || '';
+        document.querySelector('#soundcloudArtwork').value = element.dataset.artwork || '';
+        document.querySelector('#soundcloudPlays').value = element.dataset.plays || '0';
+        document.querySelector('#trackSource').value = 'soundcloud';
 
+        // Highlight selected
         document.querySelectorAll('.search-result-item').forEach(function(item) {
             item.classList.remove('selected');
-    });
+        });
         element.classList.add('selected');
-}
+
+        // Scroll to form
+        document.querySelector('#title').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    function escapeAttr(text) {
+        if (!text) return '';
+        return text.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    function formatNumber(num) {
+        if (!num) return '0';
+        if (num >= 1000000) {
+            return (num / 1000000).toFixed(1) + 'M';
+        } else if (num >= 1000) {
+            return (num / 1000).toFixed(1) + 'K';
+        }
+        return num.toString();
+    }
+
+    // Search on Enter key
+    document.querySelector('#scSearch').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            searchSoundCloud();
+        }
+    });
+
+    // URL import on Enter key
+    document.querySelector('#scUrl').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            importFromUrl();
+        }
+    });
 </script>
 
 <%- include('../partials/footer') %>
