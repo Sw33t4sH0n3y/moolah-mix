@@ -1,0 +1,247 @@
+<%- include('../partials/header') %>
+
+<main class="revenue-page">
+    <div class="page-container">
+    <a href="/tracks/<%= track._id %>" class="back-link">← Back to <%= track.title %></a>
+
+    <div class="card revenue-card">
+        <div class="revenue-header">
+            <h1>💰 Revenue Calculator</h1>
+            <p class="text-muted">"<%= track.title %>"</p>
+        </div>
+
+        <hr class="form-divider">
+
+        <!-- Calculator Inputs -->
+        <div class="calculator-section">
+            <div class="input-group">
+                <label for="streams">Number of Streams</label>
+                <input type="number" 
+                       id="streams" 
+                       class="revenue-input" 
+                       placeholder="e.g. 100000"
+                       min="0"
+                       value="100000">
+            </div>
+
+            <div class="input-group">
+                <label for="platform">Streaming Platform</label>
+                <select id="platform" class="revenue-select">
+                    <% Object.keys(platforms).forEach(function(key) { %>
+                        <option value="<%= platforms[key].rate %>" data-name="<%= platforms[key].name %>">
+                            <%= platforms[key].icon %> <%= platforms[key].name %> (~$<%= platforms[key].rate.toFixed(4) %>/stream)
+                        </option>
+                    <% }) %>
+                    <option value="custom">⚙️ Custom Rate</option>
+                </select>
+            </div>
+
+            <div class="input-group hidden" id="customRateGroup">
+                <label for="customRate">Custom Rate ($ per stream)</label>
+                <input type="number" 
+                       id="customRate" 
+                       class="revenue-input" 
+                       placeholder="0.003"
+                       step="0.0001"
+                       min="0"
+                       value="0.003">
+            </div>
+
+            <button type="button" class="btn btn-primary btn-full" onclick="calculateRevenue()">
+                🧮 Calculate
+            </button>
+        </div>
+
+        <hr class="form-divider">
+
+        <!-- Results -->
+        <div class="results-section" id="results">
+            <h2>📊 Estimated Revenue</h2>
+            
+            <div class="total-revenue">
+                <span class="total-label">Total Revenue</span>
+                <span class="total-amount" id="totalRevenue">$0.00</span>
+            </div>
+
+            <div class="revenue-breakdown">
+                <h3>💸 Split Breakdown</h3>
+                
+                <!-- Master Revenue -->
+                <div class="breakdown-section">
+                    <h4>🎵 Master Recording</h4>
+                    <div class="breakdown-list" id="masterBreakdown"></div>
+                </div>
+
+                <!-- Publishing Revenue -->
+                <div class="breakdown-section">
+                    <h4>📝 Publishing</h4>
+                    <div class="breakdown-list" id="publishingBreakdown"></div>
+                </div>
+            </div>
+
+            <div class="revenue-note">
+                <p>⚠️ These are estimates only. Actual payouts vary based on listener location, subscription type, and platform agreements.</p>
+            </div>
+        </div>
+
+        <hr class="form-divider">
+
+        <!-- Quick Scenarios -->
+        <div class="scenarios-section">
+            <h3>🚀 Quick Scenarios</h3>
+            <div class="scenario-buttons">
+                <button type="button" class="btn btn-secondary" onclick="setStreams(10000)">
+                    10K Streams
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="setStreams(100000)">
+                    100K Streams
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="setStreams(1000000)">
+                    1M Streams
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="setStreams(10000000)">
+                    10M Streams
+                </button>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Hidden data elements -->
+<div id="serverData" 
+     data-owner="<%= user.displayName || user.username || 'Owner' %>"
+     data-master-owner="<%= (track.splits && track.splits.master) ? track.splits.master.owner : 100 %>"
+     data-pub-owner="<%= (track.splits && track.splits.publishing) ? track.splits.publishing.owner : 100 %>"
+     style="display: none;">
+</div>
+
+<div id="collabData" style="display: none;">
+<% if (track.collaborators && track.collaborators.length > 0) { %>
+    <% track.collaborators.forEach(function(collab, index) { %>
+        <%
+            const collabId = collab._id.toString();
+            let masterPct = 0;
+            let pubPct = 0;
+            
+            if (track.splits && track.splits.master && track.splits.master.collaborators) {
+                masterPct = track.splits.master.collaborators.get(collabId) || 0;
+            }
+            if (track.splits && track.splits.publishing && track.splits.publishing.collaborators) {
+                pubPct = track.splits.publishing.collaborators.get(collabId) || 0;
+            }
+        %>
+        <span class="collab-item" 
+              data-name="<%= collab.name %>" 
+              data-master="<%= masterPct %>" 
+              data-pub="<%= pubPct %>"></span>
+    <% }); %>
+<% } %>
+</div>
+
+<script>
+    // Get data from hidden elements
+    const serverData = document.querySelector('#serverData');
+    const ownerName = serverData.getAttribute('data-owner');
+    const masterOwnerPct = parseInt(serverData.getAttribute('data-master-owner')) || 100;
+    const pubOwnerPct = parseInt(serverData.getAttribute('data-pub-owner')) || 100;
+    
+    // Build collaborators array
+    const collabItems = document.querySelectorAll('.collab-item');
+    const masterCollabs = [];
+    const pubCollabs = [];
+    
+    collabItems.forEach(function(item) {
+        const name = item.getAttribute('data-name');
+        const masterPct = parseInt(item.getAttribute('data-master')) || 0;
+        const pubPct = parseInt(item.getAttribute('data-pub')) || 0;
+        
+        masterCollabs.push({ name: name, pct: masterPct });
+        pubCollabs.push({ name: name, pct: pubPct });
+    });
+
+    // Platform select
+    const platformSelect = document.querySelector('#platform');
+    const customRateGroup = document.querySelector('#customRateGroup');
+    
+    platformSelect.addEventListener('change', function() {
+        if (this.value === 'custom') {
+            customRateGroup.classList.remove('hidden');
+        } else {
+            customRateGroup.classList.add('hidden');
+        }
+        calculateRevenue();
+    });
+
+    // Auto-calculate on input change
+    document.querySelector('#streams').addEventListener('input', calculateRevenue);
+    document.querySelector('#customRate').addEventListener('input', calculateRevenue);
+
+    function setStreams(num) {
+        document.querySelector('#streams').value = num;
+        calculateRevenue();
+    }
+
+    function calculateRevenue() {
+        const streams = parseInt(document.querySelector('#streams').value) || 0;
+        let rate;
+        
+        if (platformSelect.value === 'custom') {
+            rate = parseFloat(document.querySelector('#customRate').value) || 0;
+        } else {
+            rate = parseFloat(platformSelect.value);
+        }
+        
+        const totalRevenue = streams * rate;
+        const masterRevenue = totalRevenue * 0.5;
+        const publishingRevenue = totalRevenue * 0.5;
+        
+        document.querySelector('#totalRevenue').textContent = formatCurrency(totalRevenue);
+        
+        // Master breakdown
+        let masterHTML = '';
+        const ownerMasterAmount = (masterOwnerPct / 100) * masterRevenue;
+        masterHTML += createBreakdownItem(ownerName + ' (Owner)', masterOwnerPct, ownerMasterAmount);
+        
+        masterCollabs.forEach(function(collab) {
+            const amount = (collab.pct / 100) * masterRevenue;
+            masterHTML += createBreakdownItem(collab.name, collab.pct, amount);
+        });
+        document.querySelector('#masterBreakdown').innerHTML = masterHTML;
+        
+        // Publishing breakdown
+        let publishingHTML = '';
+        const ownerPubAmount = (pubOwnerPct / 100) * publishingRevenue;
+        publishingHTML += createBreakdownItem(ownerName + ' (Owner)', pubOwnerPct, ownerPubAmount);
+        
+        pubCollabs.forEach(function(collab) {
+            const amount = (collab.pct / 100) * publishingRevenue;
+            publishingHTML += createBreakdownItem(collab.name, collab.pct, amount);
+        });
+        document.querySelector('#publishingBreakdown').innerHTML = publishingHTML;
+    }
+
+    function createBreakdownItem(name, pct, amount) {
+        const div = document.createElement('div');
+        div.className = 'breakdown-item';
+        div.innerHTML = '<div class="breakdown-person">' +
+            '<span class="person-name">' + name + '</span>' +
+            '<span class="person-pct">' + pct + '%</span>' +
+            '</div>' +
+            '<div class="breakdown-amount">' + formatCurrency(amount) + '</div>';
+        return div.outerHTML;
+    }
+
+    function formatCurrency(amount) {
+        return new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD',
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }).format(amount);
+    }
+
+    // Initial calculation
+    calculateRevenue();
+</script>
+
+<%- include('../partials/footer') %>
