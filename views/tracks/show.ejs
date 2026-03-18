@@ -13,8 +13,14 @@
        
     <div class="track-header">
         <div class="track-header-info">
-            <h1><%= track.title %></h1>
-            <div class="track-meta">
+  <% if (track.artists && track.artists.length > 0) { %>
+        <p class="track-artists">
+            <% track.artists.forEach(function(artist, index) { %>
+                <%= artist.name %><% if (artist.role === 'featured') { %> (ft.)<% } %><% if (artist.role === 'remix') { %> [Remix]<% } %><% if (index < track.artists.length - 1) { %>, <% } %>
+            <% }) %>
+        </p>
+    <% } %>            
+    <div class="track-meta">
                 <span class="status-badge status-<%= track.status || 'draft' %>"><%= track.status || 'draft' %></span>
                 <% if (track.releaseDate) { %>
                 <span>📅 <%= new Date(track.releaseDate).toLocaleDateString() %></span>
@@ -29,6 +35,7 @@
             <a href="/tracks/<%= track._id%>/edit" class="btn btn-secondary">✏️ Edit</a>
             <a href="/tracks/<%= track._id%>/pdf" class="btn btn-secondary">📄 Download PDF</a>
             <a href="/tracks/<%= track._id %>/share" class="btn btn-secondary" target="_blank">🔗 Share</a>
+            <a href="/tracks/<%= track._id %>/revenue" class="btn btn-secondary">💰 Revenue Calculator</a>
         </div>
     </div>
         <div class="track-content">
